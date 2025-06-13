@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1091599116851",
+    "project_id": "maison-flowers",
+    "storage_bucket": "maison-flowers.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091599116851:android:b37a25715107ba49309146",
+        "android_client_info": {
+          "package_name": "com.example.maisonflowers"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlNfDSSJwfi2qyCxc9BjB8E0MexDLRyrE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
