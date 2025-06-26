@@ -75,7 +75,7 @@ fun CategoryItem(category: FlowerCategory, onClick: () -> Unit) {
 }
 
 @Composable
-fun ProductCard(product: FlowerProduct, onClick: () -> Unit) {
+fun ProductCard(product: FlowerProduct, onClick: () -> Unit, onAddToCart: (FlowerProduct) -> Unit) { // ¡NUEVO PARAMETRO!
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -115,7 +115,7 @@ fun ProductCard(product: FlowerProduct, onClick: () -> Unit) {
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
-                IconButton(onClick = { /* TODO: Añadir al carrito */ }) {
+                IconButton(onClick = { onAddToCart(product) }) {
                     Icon(
                         imageVector = Icons.Default.AddShoppingCart,
                         contentDescription = "Añadir al carrito",
