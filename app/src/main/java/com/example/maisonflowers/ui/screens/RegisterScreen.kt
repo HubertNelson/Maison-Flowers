@@ -1,7 +1,5 @@
 package com.example.maisonflowers.ui.screens
 
-import android.app.DatePickerDialog
-import android.widget.DatePicker
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -23,7 +20,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -38,46 +34,124 @@ import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 
-// importaciones para firease
+// Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.firestore.FirebaseFirestore
-import java.util.Calendar
 
 @Composable
 fun RegisterScreen(navController: NavController) {
+    // Estados para los campos de entrada
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
-    var dateOfBirth by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    // Estado para la visibilidad de la contraseña
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
+    // Estado para mensajes de error
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val context = LocalContext.current
-
-    val year: Int
-    val month: Int
-    val day: Int
-    val calendar = Calendar.getInstance()
-    year = calendar.get(Calendar.YEAR)
-    month = calendar.get(Calendar.MONTH)
-    day = calendar.get(Calendar.DAY_OF_MONTH)
-    calendar.timeInMillis = System.currentTimeMillis()
-
-    val datePickerDialog = DatePickerDialog(
-        context,
-        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDayOfMonth: Int ->
-            dateOfBirth = "$selectedDayOfMonth/${selectedMonth + 1}/$selectedYear"
-        }, year, month, day
-    )
-
+    // Obtener las instancias de Firebase
     val auth = FirebaseAuth.getInstance()
     val db = FirebaseFirestore.getInstance()
 
+    // Acciones para pasar al composable de contenido
+    val onEmailChange: (String) -> Unit = { email = it }
+    val onUsernameChange: (String) -> Unit = { username = it }
+    val onPhoneNumberChange: (String) -> Unit = { phoneNumber = it }
+    val onPasswordChange: (String) -> Unit = { password = it }
+    val onConfirmPasswordChange: (String) -> Unit = { confirmPassword = it }
+    val onTogglePasswordVisibility: () -> Unit = { passwordVisible = !passwordVisible }
+    val onToggleConfirmPasswordVisibility: () -> Unit = { confirmPasswordVisible = !confirmPasswordVisible }
+    val onRegisterClick: () -> Unit = {
+        errorMessage = null
+        if (password != confirmPassword) {
+            errorMessage = "Las contraseñas no coinciden."
+        } else {
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        user?.let { firebaseUser ->
+                            val userData = hashMapOf(
+                                "email" to firebaseUser.email,
+                                "username" to username,
+                                "phoneNumber" to phoneNumber,
+                                "registrationDate" to System.currentTimeMillis()
+                            )
+
+                            db.collection("users").document(firebaseUser.uid)
+                                .set(userData)
+                                .addOnSuccessListener {
+                                    navController.navigate("home_screen") {
+                                        popUpTo(navController.graph.id) { inclusive = true }
+                                    }
+                                }
+                                .addOnFailureListener { e ->
+                                    errorMessage = "Error al guardar datos de usuario: ${e.message}"
+                                }
+                        }
+                    } else {
+                        errorMessage = when ((task.exception as? FirebaseAuthException)?.errorCode) {
+                            "ERROR_WEAK_PASSWORD" -> "La contraseña es demasiado débil. Debe tener al menos 6 caracteres."
+                            "ERROR_INVALID_EMAIL" -> "Formato de correo electrónico inválido."
+                            "ERROR_EMAIL_ALREADY_IN_USE" -> "Este correo electrónico ya está registrado."
+                            else -> "Error de registro: ${task.exception?.message}"
+                        }
+                    }
+                }
+        }
+    }
+    val onLoginLinkClick: () -> Unit = {
+        navController.navigate("login_screen")
+    }
+
+    // Llama al Composable de contenido puro de UI
+    RegisterScreenContent(
+        email = email,
+        onEmailChange = onEmailChange,
+        username = username,
+        onUsernameChange = onUsernameChange,
+        phoneNumber = phoneNumber,
+        onPhoneNumberChange = onPhoneNumberChange,
+        password = password,
+        onPasswordChange = onPasswordChange,
+        confirmPassword = confirmPassword,
+        onConfirmPasswordChange = onConfirmPasswordChange,
+        passwordVisible = passwordVisible,
+        onTogglePasswordVisibility = onTogglePasswordVisibility,
+        confirmPasswordVisible = confirmPasswordVisible,
+        onToggleConfirmPasswordVisibility = onToggleConfirmPasswordVisibility,
+        errorMessage = errorMessage,
+        onRegisterClick = onRegisterClick,
+        onLoginLinkClick = onLoginLinkClick
+    )
+}
+
+@Composable
+fun RegisterScreenContent(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    username: String,
+    onUsernameChange: (String) -> Unit,
+    phoneNumber: String,
+    onPhoneNumberChange: (String) -> Unit,
+    password: String,
+    onPasswordChange: (String) -> Unit,
+    confirmPassword: String,
+    onConfirmPasswordChange: (String) -> Unit,
+    passwordVisible: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    confirmPasswordVisible: Boolean,
+    onToggleConfirmPasswordVisibility: () -> Unit,
+    errorMessage: String?,
+    onRegisterClick: () -> Unit,
+    onLoginLinkClick: () -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -116,7 +190,7 @@ fun RegisterScreen(navController: NavController) {
             )
 
             Text(
-                text = "Introduce tus datos para abrir una nueva cuenta y\nempieza a enviar encantadoras flores.",
+                text = "Introduce tus datos para abrir una nueva cuenta y\nempieza a comprar encantadoras flores.",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
@@ -127,7 +201,7 @@ fun RegisterScreen(navController: NavController) {
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = onEmailChange,
                 label = { Text("Gmail") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier
@@ -145,7 +219,7 @@ fun RegisterScreen(navController: NavController) {
 
             OutlinedTextField(
                 value = username,
-                onValueChange = { username = it },
+                onValueChange = onUsernameChange,
                 label = { Text("Nombre de Usuario") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 modifier = Modifier
@@ -162,15 +236,10 @@ fun RegisterScreen(navController: NavController) {
             )
 
             OutlinedTextField(
-                value = dateOfBirth,
-                onValueChange = { dateOfBirth = it },
-                label = { Text("Fecha de nacimiento") },
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { datePickerDialog.show() }) {
-                        Icon(Icons.Filled.DateRange, contentDescription = "Seleccionar fecha")
-                    }
-                },
+                value = phoneNumber,
+                onValueChange = onPhoneNumberChange,
+                label = { Text("Número de Teléfono") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .padding(vertical = 8.dp),
@@ -186,14 +255,14 @@ fun RegisterScreen(navController: NavController) {
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = onPasswordChange,
                 label = { Text("Contraseña") },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(onClick = onTogglePasswordVisibility) {
                         Icon(imageVector = image, contentDescription = "Toggle password visibility")
                     }
                 },
@@ -212,15 +281,15 @@ fun RegisterScreen(navController: NavController) {
 
             OutlinedTextField(
                 value = confirmPassword,
-                onValueChange = { confirmPassword = it },
+                onValueChange = onConfirmPasswordChange,
                 label = { Text("Confirmar contraseña") },
                 visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     val image = if (confirmPasswordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
 
-                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
-                        Icon(imageVector = image, contentDescription = "Toggle password visibility")
+                    IconButton(onClick = onToggleConfirmPasswordVisibility) {
+                        Icon(imageVector = image, contentDescription = "Toggle confirm password visibility")
                     }
                 },
                 modifier = Modifier
@@ -247,48 +316,7 @@ fun RegisterScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = {
-                    errorMessage = null
-                    if (password != confirmPassword) {
-                        errorMessage = "Las contraseñas no coinciden."
-                    } else {
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    // registro exitoso
-                                    val user = auth.currentUser
-                                    user?.let { firebaseUser ->
-                                        val userData = hashMapOf(
-                                            "email" to firebaseUser.email,
-                                            "username" to username,
-                                            "dateOfBirth" to dateOfBirth,
-                                            "registrationDate" to System.currentTimeMillis()
-                                        )
-
-                                        db.collection("users").document(firebaseUser.uid)
-                                            .set(userData)
-                                            .addOnSuccessListener {
-                                                navController.navigate("home_screen") {
-                                                    popUpTo(navController.graph.id) { inclusive = true }
-                                                }
-                                            }
-                                            .addOnFailureListener { e ->
-                                                // Error al guardar en Firestore
-                                                errorMessage = "Error al guardar datos de usuario: ${e.message}"
-                                                // Considerar si aún se debe navegar o revertir el registro de Auth
-                                            }
-                                    }
-                                } else {
-                                    errorMessage = when ((task.exception as? FirebaseAuthException)?.errorCode) {
-                                        "ERROR_WEAK_PASSWORD" -> "La contraseña es demasiado débil. Debe tener al menos 6 caracteres."
-                                        "ERROR_INVALID_EMAIL" -> "Formato de correo electrónico inválido."
-                                        "ERROR_EMAIL_ALREADY_IN_USE" -> "Este correo electrónico ya está registrado."
-                                        else -> "Error de registro: ${task.exception?.message}"
-                                    }
-                                }
-                            }
-                    }
-                },
+                onClick = onRegisterClick,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 shape = RoundedCornerShape(24.dp),
                 modifier = Modifier
@@ -345,9 +373,7 @@ fun RegisterScreen(navController: NavController) {
                     color = MaterialTheme.colorScheme.primary,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.clickable {
-                        navController.navigate("login_screen")
-                    }
+                    modifier = Modifier.clickable(onClick = onLoginLinkClick)
                 )
             }
 
@@ -360,7 +386,51 @@ fun RegisterScreen(navController: NavController) {
 @Composable
 fun PreviewRegisterScreen() {
     MaisonFlowersTheme {
-        RegisterScreen(navController = rememberNavController())
+        // Pasa datos de prueba (mock data) a RegisterScreenContent para la previsualización
+        RegisterScreenContent(
+            email = "test@example.com",
+            onEmailChange = {},
+            username = "UsuarioDemo",
+            onUsernameChange = {},
+            phoneNumber = "123456789",
+            onPhoneNumberChange = {},
+            password = "password123",
+            onPasswordChange = {},
+            confirmPassword = "password123",
+            onConfirmPasswordChange = {},
+            passwordVisible = false,
+            onTogglePasswordVisibility = {},
+            confirmPasswordVisible = false,
+            onToggleConfirmPasswordVisibility = {},
+            errorMessage = null,
+            onRegisterClick = {},
+            onLoginLinkClick = {}
+        )
     }
 }
-    
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewRegisterScreenWithError() {
+    MaisonFlowersTheme {
+        RegisterScreenContent(
+            email = "invalid@example.com",
+            onEmailChange = {},
+            username = "UsuarioError",
+            onUsernameChange = {},
+            phoneNumber = "987654321",
+            onPhoneNumberChange = {},
+            password = "short",
+            onPasswordChange = {},
+            confirmPassword = "short",
+            onConfirmPasswordChange = {},
+            passwordVisible = false,
+            onTogglePasswordVisibility = {},
+            confirmPasswordVisible = false,
+            onToggleConfirmPasswordVisibility = {},
+            errorMessage = "La contraseña es demasiado débil.",
+            onRegisterClick = {},
+            onLoginLinkClick = {}
+        )
+    }
+}

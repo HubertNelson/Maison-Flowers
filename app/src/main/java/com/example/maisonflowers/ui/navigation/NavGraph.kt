@@ -2,10 +2,15 @@ package com.example.maisonflowers.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.maisonflowers.ui.screens.AccountScreen
+import com.example.maisonflowers.ui.screens.CategoryScreen
 import com.example.maisonflowers.ui.screens.HomeScreen
 import com.example.maisonflowers.ui.screens.LoginScreen
+import com.example.maisonflowers.ui.screens.ProductListScreen
 import com.example.maisonflowers.ui.screens.RegisterScreen
 import com.example.maisonflowers.ui.screens.SplashScreen // Importa SplashScreen
 import com.example.maisonflowers.ui.screens.WelcomeScreen1 // Importa WelcomeScreen (la que te generé antes)
@@ -49,6 +54,23 @@ fun NavGraph(navController: NavHostController) {
 
         composable("home_screen") {
             HomeScreen(navController = navController)
+        }
+
+        composable("category_screen") {
+            CategoryScreen(navController = navController)
+        }
+
+        // Ruta para la lista de productos por categoría
+        composable(
+            route = "product_list_screen/{categoryName}",
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("categoryName")
+            ProductListScreen(navController = navController, categoryName = categoryName)
+        }
+
+        composable("account_screen") {
+            AccountScreen(navController = navController)
         }
     }
 }
