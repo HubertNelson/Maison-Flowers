@@ -144,7 +144,11 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
                 )
                 NavigationBarItem(
                     selected = selectedItem == 2,
-                    onClick = { selectedItem = 2 /* TODO: Navegar a pantalla de búsqueda */ },
+                    onClick = {
+                        selectedItem = 2
+                        navController.navigate("search_screen") {
+                        }
+                    },
                     icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
                     label = { Text("Buscar") },
                     colors = NavigationBarItemDefaults.colors(

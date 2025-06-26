@@ -12,6 +12,7 @@ import com.example.maisonflowers.ui.screens.HomeScreen
 import com.example.maisonflowers.ui.screens.LoginScreen
 import com.example.maisonflowers.ui.screens.ProductListScreen
 import com.example.maisonflowers.ui.screens.RegisterScreen
+import com.example.maisonflowers.ui.screens.SearchScreen
 import com.example.maisonflowers.ui.screens.SplashScreen // Importa SplashScreen
 import com.example.maisonflowers.ui.screens.WelcomeScreen1 // Importa WelcomeScreen (la que te generé antes)
 import com.example.maisonflowers.ui.screens.WelcomeScreen2
@@ -71,6 +72,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable("account_screen") {
             AccountScreen(navController = navController)
+        }
+
+        composable("search_screen") {
+            SearchScreen(navController = navController)
         }
     }
 }
