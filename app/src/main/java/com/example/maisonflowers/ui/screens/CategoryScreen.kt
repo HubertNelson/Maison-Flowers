@@ -138,7 +138,11 @@ fun CategoryScreen(navController: NavController) {
                 )
                 NavigationBarItem(
                     selected = selectedItem == 3,
-                    onClick = { selectedItem = 3 /* TODO: Navegar a pantalla de carrito */ },
+                    onClick = {
+                        selectedItem = 3
+                        navController.navigate("cart_screen") {
+                        }
+                    },
                     icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
                     label = { Text("Carrito") },
                     colors = NavigationBarItemDefaults.colors(

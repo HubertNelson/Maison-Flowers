@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.maisonflowers.ui.screens.AccountScreen
+import com.example.maisonflowers.ui.screens.CartScreen
 import com.example.maisonflowers.ui.screens.CategoryScreen
 import com.example.maisonflowers.ui.screens.HomeScreen
 import com.example.maisonflowers.ui.screens.LoginScreen
@@ -76,6 +77,10 @@ fun NavGraph(navController: NavHostController) {
 
         composable("search_screen") {
             SearchScreen(navController = navController)
+        }
+
+        composable("cart_screen") {
+            CartScreen(navController = navController)
         }
     }
 }
