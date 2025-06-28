@@ -34,10 +34,14 @@ import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerCategory
 import com.example.maisonflowers.ui.components.CategoryItem
+import com.example.maisonflowers.ui.viewmodels.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryScreen(navController: NavController) {
+fun CategoryScreen(
+    navController: NavController,
+    cartViewModel: CartViewModel // Sin default `viewModel()` aquí para que NavGraph lo pase!
+) {
     var selectedItem by remember { mutableIntStateOf(1) } // 1 para categorias
 
     val categories = remember {
@@ -123,8 +127,7 @@ fun CategoryScreen(navController: NavController) {
                     selected = selectedItem == 2,
                     onClick = {
                         selectedItem = 2
-                        navController.navigate("search_screen") {
-                        }
+                        navController.navigate("search_screen")
                     },
                     icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
                     label = { Text("Buscar") },
@@ -140,8 +143,7 @@ fun CategoryScreen(navController: NavController) {
                     selected = selectedItem == 3,
                     onClick = {
                         selectedItem = 3
-                        navController.navigate("cart_screen") {
-                        }
+                        navController.navigate("cart_screen")
                     },
                     icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
                     label = { Text("Carrito") },
@@ -195,6 +197,7 @@ fun CategoryScreen(navController: NavController) {
 @Composable
 fun PreviewCategoryScreen() {
     MaisonFlowersTheme {
-        CategoryScreen(navController = rememberNavController())
+        // se crea una instancia del ViewModel directamente para la previsualización / error temporal hasta crear el ViewModel real.
+        CategoryScreen(navController = rememberNavController(), cartViewModel = CartViewModel())
     }
 }

@@ -35,29 +35,24 @@ import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerProduct
+import com.example.maisonflowers.ui.viewmodels.CartViewModel
 
 // Nuevo Data Class para representar un ítem en el carrito
 data class CartItem(
     val product: FlowerProduct,
-    var quantity: Int // La cantidad de este producto en el carrito
+    var quantity: Int   // La cantidad de este producto en el carrito
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CartScreen(navController: NavController) {
-    var selectedItem by remember { mutableIntStateOf(3) } // 3 for Cart
+fun CartScreen(
+    navController: NavController,
+    cartViewModel: CartViewModel
+) {
+    var selectedItem by remember { mutableIntStateOf(3) }
 
-    // Lista de ítems en el carrito
-    // En una aplicación real, esto se gestionaría con un ViewModel y datos persistentes.
-    val cartItems = remember {
-        mutableStateListOf(
-            CartItem(FlowerProduct("Classic Red Roses", "S/ 85.00", R.drawable.logomaison), 1),
-            CartItem(FlowerProduct("Ramo de 6 Girasoles", "S/ 65.00", R.drawable.logomaison), 2),
-            CartItem(FlowerProduct("Elegant White Roses", "S/ 92.00", R.drawable.logomaison), 1)
-        )
-    }
+    val cartItems = cartViewModel.cartItems // Obtiene los ítems del ViewModel
 
-    // Calcular subtotal, costo de envío y total
     val subtotal = cartItems.sumOf { item ->
         val priceString = item.product.price.replace("S/", "").trim().replace(",", "")
         val price = priceString.toDoubleOrNull() ?: 0.0
@@ -242,16 +237,9 @@ fun CartScreen(navController: NavController) {
                         CartItemCard(
                             cartItem = item,
                             onQuantityChange = { newQuantity ->
-                                val index = cartItems.indexOf(item)
-                                if (index != -1) {
-                                    if (newQuantity > 0) {
-                                        cartItems[index] = item.copy(quantity = newQuantity)
-                                    } else {
-                                        cartItems.removeAt(index) // Eliminar si la cantidad es 0
-                                    }
-                                }
+                                cartViewModel.updateQuantity(item, newQuantity)
                             },
-                            onRemoveItem = { cartItems.remove(item) }
+                            onRemoveItem = { cartViewModel.removeItem(item) }
                         )
                     }
                     item {
@@ -422,107 +410,23 @@ fun OrderSummaryRow(label: String, value: String, isTotal: Boolean = false) {
 @Composable
 fun PreviewCartScreenWithItems() {
     MaisonFlowersTheme {
-        CartScreen(navController = rememberNavController())
+        // En preview, se crea una instancia del ViewModel directamente para la previsualización.
+        val navController = rememberNavController()
+        val previewCartViewModel = CartViewModel()
+        previewCartViewModel.addItem(FlowerProduct("Preview Roses", "S/ 10.00", R.drawable.logomaison))
+        previewCartViewModel.addItem(FlowerProduct("Preview Girasoles", "S/ 15.00", R.drawable.logomaison))
+
+        CartScreen(navController = navController, cartViewModel = previewCartViewModel)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 fun PreviewCartScreenEmpty() {
     MaisonFlowersTheme {
-        // Para previsualizar un carrito vacío, puedes pasar una lista vacía o manipular el estado.
-        // Para simplificar la previsualización, se puede crear un composable separado o usar un estado global simulado
-        // aquí simplemente invocamos CartScreen que por defecto puede tener items.
-        // Una forma de forzar el carrito vacío en el preview sería:
-        val emptyCartNavController = rememberNavController()
-        var selectedItem by remember { mutableStateOf(3) } // 3 for Cart
-        val cartItems = remember { mutableStateListOf<CartItem>() } // Lista vacía
+        val navController = rememberNavController()
+        val previewCartViewModel = CartViewModel() // Nueva instancia, vacía por defecto, actualizar mas tarde
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(
-                            text = "Mi Carrito",
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { emptyCartNavController.popBackStack() }) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Volver",
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground,
-                        actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            bottomBar = {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.onBackground
-                ) {
-                    NavigationBarItem(selected = selectedItem == 0, onClick = {selectedItem = 0}, icon = { Icon(Icons.Filled.Home, "")}, label = {Text("Home")})
-                    NavigationBarItem(selected = selectedItem == 1, onClick = {selectedItem = 1}, icon = { Icon(Icons.Filled.Apps, "")}, label = {Text("Categories")})
-                    NavigationBarItem(selected = selectedItem == 2, onClick = {selectedItem = 2}, icon = { Icon(Icons.Filled.Search, "")}, label = {Text("Search")})
-                    NavigationBarItem(selected = selectedItem == 3, onClick = {selectedItem = 3}, icon = { Icon(Icons.Filled.ShoppingCart, "")}, label = {Text("Cart")}, colors = NavigationBarItemDefaults.colors(selectedIconColor = MaterialTheme.colorScheme.primary, selectedTextColor = MaterialTheme.colorScheme.primary, unselectedIconColor = MaterialTheme.colorScheme.onBackground, unselectedTextColor = MaterialTheme.colorScheme.onBackground, indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)))
-                    NavigationBarItem(selected = selectedItem == 4, onClick = {selectedItem = 4}, icon = { Icon(Icons.Filled.Person, "")}, label = {Text("Account")})
-                }
-            }
-        ) { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = "Carrito Vacío",
-                    modifier = Modifier.size(96.dp),
-                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "¡Tu carrito está vacío!",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Añade algunas flores hermosas para empezar tu pedido.",
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(horizontal = 32.dp)
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
-                    onClick = { emptyCartNavController.navigate("home_screen") },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                    shape = RoundedCornerShape(24.dp),
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(56.dp)
-                ) {
-                    Text("Explorar Flores", color = MaterialTheme.colorScheme.onPrimary)
-                }
-            }
-        }
+        CartScreen(navController = navController, cartViewModel = previewCartViewModel)
     }
 }

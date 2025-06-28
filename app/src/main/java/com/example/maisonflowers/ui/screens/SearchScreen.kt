@@ -29,10 +29,14 @@ import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerProduct
 import com.example.maisonflowers.ui.components.ProductCard
+import com.example.maisonflowers.ui.viewmodels.CartViewModel // Importa el ViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchScreen(navController: NavController) {
+fun SearchScreen(
+    navController: NavController,
+    cartViewModel: CartViewModel // Sin default `viewModel()` aquí para que NavGraph lo pase!
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedItem by remember { mutableIntStateOf(2) }
 
@@ -45,14 +49,11 @@ fun SearchScreen(navController: NavController) {
             FlowerProduct("Cheerful Yellow Roses", "S/ 80.00", R.drawable.logomaison),
             FlowerProduct("Ramo de 6 Girasoles", "S/ 65.00", R.drawable.logomaison),
             FlowerProduct("Girasoles Vibrantes", "S/ 70.00", R.drawable.logomaison),
-            FlowerProduct("Alegre Ramo de Girasoles", "S/ 75.00", R.drawable.logomaison),
             FlowerProduct("Lirios Blancos Puros", "S/ 60.00", R.drawable.logomaison),
             FlowerProduct("Lirios Rosados Exóticos", "S/ 68.00", R.drawable.logomaison),
             FlowerProduct("Tulipanes Mixtos", "S/ 72.00", R.drawable.logomaison),
-            FlowerProduct("Orquídea Phalaenopsis", "S/ 120.00", R.drawable.logomaison), // Reutilizando imagen
-            FlowerProduct("Ramo de Lavanda", "S/ 55.00", R.drawable.logomaison), // Reutilizando imagen
-            FlowerProduct("Ramo para Cumpleaños", "S/ 90.00", R.drawable.logomaison),
-            FlowerProduct("Arreglo Floral de Aniversario", "S/ 110.00", R.drawable.logomaison)
+            FlowerProduct("Orquídea Phalaenopsis", "S/ 120.00", R.drawable.logomaison),
+            FlowerProduct("Ramo de Lavanda", "S/ 55.00", R.drawable.logomaison)
         )
     }
 
@@ -87,6 +88,9 @@ fun SearchScreen(navController: NavController) {
                             tint = MaterialTheme.colorScheme.onBackground
                         )
                     }
+                },
+                actions = {
+                    // icono de filtro, en caso de usarlo
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -156,8 +160,7 @@ fun SearchScreen(navController: NavController) {
                     selected = selectedItem == 3,
                     onClick = {
                         selectedItem = 3
-                        navController.navigate("cart_screen") {
-                        }
+                        navController.navigate("cart_screen")
                     },
                     icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
                     label = { Text("Carrito") },
@@ -253,10 +256,13 @@ fun SearchScreen(navController: NavController) {
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     items(filteredProducts) { product ->
-                        ProductCard(product = product) {
-                            // TODO: Navegar a la pantalla de detalles del producto
-                            println("Producto seleccionado: ${product.name}")
-                        }
+                        ProductCard(
+                            product = product,
+                            onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
+                            onAddToCart = { productToAdd ->
+                                cartViewModel.addItem(productToAdd)
+                            }
+                        )
                     }
                 }
             } else {
@@ -289,6 +295,7 @@ fun SearchScreen(navController: NavController) {
 @Composable
 fun PreviewSearchScreen() {
     MaisonFlowersTheme {
-        SearchScreen(navController = rememberNavController())
+        // En preview, se crea una instancia del ViewModel directamente para la previsualización / error temporal hasta crear el ViewModel real
+        SearchScreen(navController = rememberNavController(), cartViewModel = CartViewModel())
     }
 }

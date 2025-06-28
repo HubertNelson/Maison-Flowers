@@ -27,12 +27,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maisonflowers.R
 
-// Data Classes compartidos
 data class FlowerCategory(val name: String, val imageResId: Int)
 data class FlowerProduct(val name: String, val price: String, val imageResId: Int)
 
 
-// Composables compartidos
 @Composable
 fun CategoryItem(category: FlowerCategory, onClick: () -> Unit) {
     Column(
@@ -75,7 +73,7 @@ fun CategoryItem(category: FlowerCategory, onClick: () -> Unit) {
 }
 
 @Composable
-fun ProductCard(product: FlowerProduct, onClick: () -> Unit, onAddToCart: (FlowerProduct) -> Unit) { // ¡NUEVO PARAMETRO!
+fun ProductCard(product: FlowerProduct, onClick: () -> Unit, onAddToCart: (FlowerProduct) -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),

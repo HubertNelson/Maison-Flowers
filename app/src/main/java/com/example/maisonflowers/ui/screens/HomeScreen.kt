@@ -33,11 +33,15 @@ import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerCategory
 import com.example.maisonflowers.ui.components.FlowerProduct
 import com.example.maisonflowers.ui.components.CategoryItem
-import com.example.maisonflowers.ui.components.ProductCard // ¡Importa desde el nuevo archivo!
+import com.example.maisonflowers.ui.components.ProductCard
+import com.example.maisonflowers.ui.viewmodels.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    cartViewModel: CartViewModel // Sin default `viewModel()` aquí para que NavGraph lo pase!
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedItem by remember { mutableIntStateOf(0) }
 
@@ -54,7 +58,9 @@ fun HomeScreen(navController: NavController) {
 
     val popularProducts = remember {
         listOf(
-            FlowerProduct("Ramo de 6 girasoles", "S/ 65.00", R.drawable.logomaison)
+            FlowerProduct("Ramo de 6 girasoles", "S/ 65.00", R.drawable.logomaison),
+            FlowerProduct("Rosas Rojas Clásicas", "S/ 85.00", R.drawable.logomaison),
+            FlowerProduct("Lirios Blancos Elegantes", "S/ 70.00", R.drawable.logomaison)
         )
     }
 
@@ -138,8 +144,7 @@ fun HomeScreen(navController: NavController) {
                     selected = selectedItem == 2,
                     onClick = {
                         selectedItem = 2
-                        navController.navigate("search_screen") {
-                        }
+                        navController.navigate("search_screen")
                     },
                     icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
                     label = { Text("Buscar") },
@@ -155,8 +160,7 @@ fun HomeScreen(navController: NavController) {
                     selected = selectedItem == 3,
                     onClick = {
                         selectedItem = 3
-                        navController.navigate("cart_screen") {
-                        }
+                        navController.navigate("cart_screen")
                     },
                     icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
                     label = { Text("Carrito") },
@@ -227,7 +231,7 @@ fun HomeScreen(navController: NavController) {
                 ) {
                     items(categories) { category ->
                         CategoryItem(category = category) {
-                            // TODO: Navegar a la pantalla de productos de esta categoría
+                            navController.navigate("product_list_screen/${category.name}")
                         }
                     }
                 }
@@ -262,9 +266,13 @@ fun HomeScreen(navController: NavController) {
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(popularProducts) { product ->
-                        ProductCard(product = product) {
-                            // TODO: Navegar a la pantalla de detalles del producto
-                        }
+                        ProductCard(
+                            product = product,
+                            onClick = { /* TODO: Navegar a detalles del producto */ },
+                            onAddToCart = { productToAdd ->
+                                cartViewModel.addItem(productToAdd)
+                            }
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
@@ -277,6 +285,7 @@ fun HomeScreen(navController: NavController) {
 @Composable
 fun PreviewHomeScreen() {
     MaisonFlowersTheme {
-        HomeScreen(navController = rememberNavController())
+        // En preview, se crea una instancia del ViewModel directamente para la previsualización / error temporal hasta crear el ViewModel real
+        HomeScreen(navController = rememberNavController(), cartViewModel = CartViewModel())
     }
 }

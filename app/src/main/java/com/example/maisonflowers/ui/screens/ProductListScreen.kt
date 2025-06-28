@@ -19,7 +19,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -34,11 +33,15 @@ import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerProduct
 import com.example.maisonflowers.ui.components.ProductCard
-import androidx.navigation.NavBackStackEntry
+import com.example.maisonflowers.ui.viewmodels.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductListScreen(navController: NavController, categoryName: String?) {
+fun ProductListScreen(
+    navController: NavController,
+    categoryName: String?,
+    cartViewModel: CartViewModel
+) {
     var searchQuery by remember { mutableStateOf("") }
     var selectedItem by remember { mutableIntStateOf(1) } // "Categorías" como seleccionado por defecto
 
@@ -146,8 +149,7 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
                     selected = selectedItem == 2,
                     onClick = {
                         selectedItem = 2
-                        navController.navigate("search_screen") {
-                        }
+                        navController.navigate("search_screen")
                     },
                     icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
                     label = { Text("Buscar") },
@@ -163,8 +165,7 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
                     selected = selectedItem == 3,
                     onClick = {
                         selectedItem = 3
-                        navController.navigate("cart_screen") {
-                        }
+                        navController.navigate("cart_screen")
                     },
                     icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
                     label = { Text("Carrito") },
@@ -210,7 +211,7 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
                 modifier = Modifier
-                    .fillMaxWidth() // Ocupa todo el ancho disponible
+                    .fillMaxWidth()
                     .height(60.dp)
                     .padding(vertical = 4.dp),
                 shape = RoundedCornerShape(24.dp),
@@ -223,7 +224,6 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
                     errorContainerColor = Color.White
                 )
             )
-
             Spacer(modifier = Modifier.height(16.dp))
 
             // Texto del contador de productos
@@ -243,11 +243,13 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(products) { product ->
-                    ProductCard(product = product) {
-                        // TODO: Navegar a la pantalla de detalles del producto
-                        println("Producto seleccionado: ${product.name}")
-                        // navController.navigate("product_detail_screen/${product.name}")
-                    }
+                    ProductCard(
+                        product = product,
+                        onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
+                        onAddToCart = { productToAdd ->
+                            cartViewModel.addItem(productToAdd)
+                        }
+                    )
                 }
             }
         }
@@ -258,6 +260,6 @@ fun ProductListScreen(navController: NavController, categoryName: String?) {
 @Composable
 fun PreviewProductListScreen() {
     MaisonFlowersTheme {
-        ProductListScreen(navController = rememberNavController(), categoryName = "ROSAS")
+        ProductListScreen(navController = rememberNavController(), categoryName = "ROSAS", cartViewModel = CartViewModel())
     }
 }
