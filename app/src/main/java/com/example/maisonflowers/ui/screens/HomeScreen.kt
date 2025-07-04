@@ -31,10 +31,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerCategory
-import com.example.maisonflowers.ui.components.FlowerProduct
 import com.example.maisonflowers.ui.components.CategoryItem
 import com.example.maisonflowers.ui.components.ProductCard
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
+import com.example.maisonflowers.models.FlowerProduct
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,13 +56,8 @@ fun HomeScreen(
         )
     }
 
-    val popularProducts = remember {
-        listOf(
-            FlowerProduct("Ramo de 6 girasoles", "S/ 65.00", R.drawable.logomaison),
-            FlowerProduct("Rosas Rojas Clásicas", "S/ 85.00", R.drawable.logomaison),
-            FlowerProduct("Lirios Blancos Elegantes", "S/ 70.00", R.drawable.logomaison)
-        )
-    }
+    // Las listas de productos populares ahora estarán vacías, se llenarán desde Firestore
+    val popularProducts = remember { mutableStateListOf<FlowerProduct>() }
 
     Column(
         modifier = Modifier
@@ -80,9 +75,9 @@ fun HomeScreen(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
+                placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
                 modifier = Modifier
                     .weight(1f)
                     .height(60.dp)
@@ -92,11 +87,11 @@ fun HomeScreen(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
-                    errorContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface, // Color del texto de entrada
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface // Color del texto de entrada
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    errorContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 )
             )
             IconButton(onClick = { navController.navigate("settings_screen") }) {
@@ -178,6 +173,7 @@ fun HomeScreen(
                     )
                 }
 
+                // Mostrar productos populares desde la lista dinámica
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier.fillMaxWidth()

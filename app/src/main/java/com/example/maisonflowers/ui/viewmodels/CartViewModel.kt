@@ -2,60 +2,47 @@ package com.example.maisonflowers.ui.viewmodels
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import com.example.maisonflowers.ui.components.FlowerProduct
-import com.example.maisonflowers.ui.screens.CartItem
+import com.example.maisonflowers.models.FlowerProduct // Importar la nueva FlowerProduct del modelo
+import com.example.maisonflowers.ui.screens.CartItem // Importar CartItem de ui.screens
 
 class CartViewModel : ViewModel() {
+    // Lista de ítems en el carrito
+    private val _cartItems = mutableStateListOf<CartItem>()
+    val cartItems: List<CartItem> get() = _cartItems
 
-    val cartItems = mutableStateListOf<CartItem>()
-
-    fun addItem(product: FlowerProduct) {
-        val existingItem = cartItems.find { it.product == product }
+    // Añadir un producto al carrito
+    fun addItem(product: FlowerProduct) { // Cambiado a FlowerProduct del modelo
+        val existingItem = _cartItems.find { it.product.id == product.id }
         if (existingItem != null) {
-            val index = cartItems.indexOf(existingItem)
-            cartItems[index] = existingItem.copy(quantity = existingItem.quantity + 1)
+            // Si el producto ya está en el carrito, incrementa la cantidad
+            existingItem.quantity++
         } else {
-            cartItems.add(CartItem(product, 1))
+            // Si no está, añade un nuevo CartItem
+            _cartItems.add(CartItem(product, 1))
         }
-        println("Producto añadido al carrito: ${product.name}. Cantidad actual: ${existingItem?.quantity ?: 1}")
-        printCartContents()
     }
 
-    fun removeItem(item: CartItem) {
-        cartItems.remove(item)
-        println("Producto eliminado del carrito: ${item.product.name}")
-        printCartContents()
-    }
-
+    // Actualizar la cantidad de un producto en el carrito
     fun updateQuantity(item: CartItem, newQuantity: Int) {
-        val index = cartItems.indexOf(item)
+        val index = _cartItems.indexOf(item)
         if (index != -1) {
-            if (newQuantity > 0) {
-                cartItems[index] = item.copy(quantity = newQuantity)
-                println("Cantidad de ${item.product.name} actualizada a $newQuantity")
+            if (newQuantity <= 0) {
+                // Si la cantidad es 0 o menos, eliminar el ítem
+                _cartItems.removeAt(index)
             } else {
-                cartItems.removeAt(index)
-                println("${item.product.name} eliminado del carrito por cantidad 0")
+                // Actualizar la cantidad
+                _cartItems[index] = item.copy(quantity = newQuantity)
             }
         }
-        printCartContents()
     }
 
+    // Eliminar un producto del carrito
+    fun removeItem(item: CartItem) {
+        _cartItems.remove(item)
+    }
+
+    // Limpiar todo el carrito
     fun clearCart() {
-        cartItems.clear()
-        println("Carrito limpiado.")
-        printCartContents()
-    }
-
-    private fun printCartContents() {
-        println("--- Contenido del Carrito ---")
-        if (cartItems.isEmpty()) {
-            println("Carrito vacío.")
-        } else {
-            cartItems.forEachIndexed { index, cartItem ->
-                println("$index: ${cartItem.product.name} - Cantidad: ${cartItem.quantity}")
-            }
-        }
-        println("-----------------------------")
+        _cartItems.clear()
     }
 }

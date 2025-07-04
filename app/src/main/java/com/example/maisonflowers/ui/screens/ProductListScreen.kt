@@ -31,9 +31,9 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
-import com.example.maisonflowers.ui.components.FlowerProduct
 import com.example.maisonflowers.ui.components.ProductCard
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
+import com.example.maisonflowers.models.FlowerProduct
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,31 +45,8 @@ fun ProductListScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
-    val products = remember(categoryName) {
-        when (categoryName) {
-            "ROSAS" -> listOf(
-                FlowerProduct("Classic Red Roses", "S/ 85.00", R.drawable.logomaison),
-                FlowerProduct("Romantic Pink Roses", "S/ 78.00", R.drawable.logomaison),
-                FlowerProduct("Elegant White Roses", "S/ 92.00", R.drawable.logomaison),
-                FlowerProduct("Cheerful Yellow Roses", "S/ 80.00", R.drawable.logomaison),
-                FlowerProduct("Velvet Deep Red Roses", "S/ 95.00", R.drawable.logomaison),
-                FlowerProduct("Sunset Orange Roses", "S/ 88.00", R.drawable.logomaison)
-            )
-            "GIRASOLES" -> listOf(
-                FlowerProduct("Ramo de 6 Girasoles", "S/ 65.00", R.drawable.logomaison),
-                FlowerProduct("Girasoles Vibrantes", "S/ 70.00", R.drawable.logomaison),
-                FlowerProduct("Alegre Ramo de Girasoles", "S/ 75.00", R.drawable.logomaison)
-            )
-            "LIRIOS" -> listOf(
-                FlowerProduct("Lirios Blancos Puros", "S/ 60.00", R.drawable.logomaison),
-                FlowerProduct("Lirios Rosados Exóticos", "S/ 68.00", R.drawable.logomaison)
-            )
-            else -> listOf(
-                FlowerProduct("Producto Genérico 1", "S/ 50.00", R.drawable.logomaison),
-                FlowerProduct("Producto Genérico 2", "S/ 55.00", R.drawable.logomaison)
-            )
-        }
-    }
+    // La lista de productos ahora estará vacía, se llenará desde Firestore
+    val products = remember { mutableStateListOf<FlowerProduct>() }
 
     Column(
         modifier = Modifier
@@ -104,9 +81,9 @@ fun ProductListScreen(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Buscar...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
+            placeholder = { Text("Buscar...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
             singleLine = true,
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
@@ -116,11 +93,11 @@ fun ProductListScreen(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
-                unfocusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
-                errorContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
-                focusedTextColor = MaterialTheme.colorScheme.onSurface, // Color del texto de entrada
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface // Color del texto de entrada
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                errorContainerColor = MaterialTheme.colorScheme.surface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
             )
         )
         Spacer(modifier = Modifier.height(16.dp))

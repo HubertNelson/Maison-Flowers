@@ -32,9 +32,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import coil.compose.rememberAsyncImagePainter
 import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
-import com.example.maisonflowers.ui.components.FlowerProduct
+import com.example.maisonflowers.models.FlowerProduct
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
 
 // Data Class para representar un ítem en el carrito (mantenerlo aquí o moverlo a un archivo de modelos si lo usas en más lugares)
@@ -53,9 +54,8 @@ fun CartScreen(
     val cartItems = cartViewModel.cartItems
 
     val subtotal = cartItems.sumOf { item ->
-        val priceString = item.product.price.replace("S/", "").trim().replace(",", "")
-        val price = priceString.toDoubleOrNull() ?: 0.0
-        price * item.quantity
+        // Ahora el precio es un Double, no un String que necesita parseo
+        item.product.price * item.quantity
     }
     val shippingCost = if (subtotal > 0) 15.00 else 0.00
     val total = subtotal + shippingCost
@@ -188,6 +188,7 @@ fun CartScreen(
     }
 }
 
+// Mantener CartItemCard y OrderSummaryRow como composables auxiliares
 @Composable
 fun CartItemCard(
     cartItem: CartItem,
@@ -207,7 +208,7 @@ fun CartItemCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(id = cartItem.product.imageResId),
+                painter = rememberAsyncImagePainter(model = cartItem.product.imageUrl.ifEmpty { "https://placehold.co/400x300/E9C9F6/673AB7?text=No+Image" }),
                 contentDescription = cartItem.product.name,
                 modifier = Modifier
                     .size(80.dp)
@@ -226,9 +227,10 @@ fun CartItemCard(
                     maxLines = 2
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                // Mostrar precio directamente del Double
                 Text(
-                    text = "Precio: ${cartItem.product.price}",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant, // Usar onSurfaceVariant
+                    text = "Precio: S/ %.2f".format(cartItem.product.price),
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -261,9 +263,7 @@ fun CartItemCard(
                 verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.height(80.dp)
             ) {
-                val priceString = cartItem.product.price.replace("S/", "").trim().replace(",", "")
-                val price = priceString.toDoubleOrNull() ?: 0.0
-                val itemSubtotal = price * cartItem.quantity
+                val itemSubtotal = cartItem.product.price * cartItem.quantity
                 Text(
                     text = "S/ %.2f".format(itemSubtotal),
                     color = MaterialTheme.colorScheme.primary,
@@ -314,8 +314,9 @@ fun PreviewCartScreenWithItems() {
     MaisonFlowersTheme {
         val navController = rememberNavController()
         val previewCartViewModel = CartViewModel()
-        previewCartViewModel.addItem(FlowerProduct("Preview Roses", "S/ 10.00", R.drawable.logomaison))
-        previewCartViewModel.addItem(FlowerProduct("Preview Girasoles", "S/ 15.00", R.drawable.logomaison))
+        // Usar FlowerProduct del modelo
+        previewCartViewModel.addItem(FlowerProduct("1", "Preview Roses", "Desc", 10.00, "https://placehold.co/400x300/E9C9F6/673AB7?text=Rosas", "ROSAS", false))
+        previewCartViewModel.addItem(FlowerProduct("2", "Preview Girasoles", "Desc", 15.00, "https://placehold.co/400x300/E9C9F6/673AB7?text=Girasoles", "GIRASOLES", true))
 
         CartScreen(navController = navController, cartViewModel = previewCartViewModel, paddingValues = PaddingValues(0.dp))
     }
