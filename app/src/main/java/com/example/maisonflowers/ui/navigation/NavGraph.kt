@@ -1,5 +1,6 @@
 package com.example.maisonflowers.ui.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -23,10 +24,14 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun NavGraph(navController: NavHostController) {
+fun NavGraph(
+    navController: NavHostController,
+    cartViewModel: CartViewModel,
+    paddingValues: PaddingValues // recibe los paddingValues del Scaffold externo
+) {
     // Obtener una única instancia de CartViewModel a nivel de NavGraph.
     // Esta instancia persistirá mientras el NavHost esté activo y será compartida.
-    val cartViewModel: CartViewModel = viewModel()
+    // val cartViewModel: CartViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -64,12 +69,12 @@ fun NavGraph(navController: NavHostController) {
 
         composable("home_screen") {
             // Pasar la instancia compartida del ViewModel
-            HomeScreen(navController = navController, cartViewModel = cartViewModel)
+            HomeScreen(navController = navController, cartViewModel = cartViewModel, paddingValues = paddingValues)
         }
 
         composable("category_screen") {
             // Pasar la instancia compartida del ViewModel
-            CategoryScreen(navController = navController, cartViewModel = cartViewModel)
+            CategoryScreen(navController = navController, cartViewModel = cartViewModel, paddingValues = paddingValues)
         }
 
         // Ruta para la lista de productos por categoría
@@ -78,19 +83,19 @@ fun NavGraph(navController: NavHostController) {
             arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
         ) { backStackEntry ->
             val categoryName = backStackEntry.arguments?.getString("categoryName")
-            ProductListScreen(navController = navController, categoryName = categoryName, cartViewModel = cartViewModel)
+            ProductListScreen(navController = navController, categoryName = categoryName, cartViewModel = cartViewModel, paddingValues = paddingValues)
         }
 
         composable("account_screen") {
-            AccountScreen(navController = navController)
+            AccountScreen(navController = navController, paddingValues = paddingValues)
         }
 
         composable("search_screen") {
-            SearchScreen(navController = navController, cartViewModel = cartViewModel)
+            SearchScreen(navController = navController, cartViewModel = cartViewModel, paddingValues = paddingValues)
         }
 
         composable("cart_screen") {
-            CartScreen(navController = navController, cartViewModel = cartViewModel)
+            CartScreen(navController = navController, cartViewModel = cartViewModel, paddingValues = paddingValues)
         }
     }
 }

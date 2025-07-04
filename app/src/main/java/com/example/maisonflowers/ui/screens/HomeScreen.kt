@@ -40,10 +40,11 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 @Composable
 fun HomeScreen(
     navController: NavController,
-    cartViewModel: CartViewModel // Sin default `viewModel()` aquí para que NavGraph lo pase!
+    cartViewModel: CartViewModel,
+    paddingValues: PaddingValues // ¡Nuevo parámetro!
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedItem by remember { mutableIntStateOf(0) }
+    // var selectedItem by remember { mutableIntStateOf(0) } // ¡Eliminado, gestionado externamente!
 
     val categories = remember {
         listOf(
@@ -64,139 +65,58 @@ fun HomeScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { /* Vacio */ },
-                navigationIcon = { /* Vacio */ },
-                actions = {
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
-                        singleLine = true,
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(60.dp)
-                            .padding(vertical = 4.dp, horizontal = 8.dp),
-                        shape = RoundedCornerShape(24.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MaterialTheme.colorScheme.primary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
-                            cursorColor = MaterialTheme.colorScheme.primary,
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White,
-                            errorContainerColor = Color.White
-                        )
+    // El Scaffold principal se ha movido a MaisonFlowersApp.
+    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        TopAppBar(
+            title = { /* Vacio */ },
+            navigationIcon = { /* Vacio */ },
+            actions = {
+                IconButton(onClick = { /* TODO: Navegar a configuración de la app */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = "Configuración",
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
-
-                    IconButton(onClick = { /* TODO: Navegar a configuración de la app */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Configuración",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        bottomBar = {
-            NavigationBar(
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
-            ) {
-                NavigationBarItem(
-                    selected = selectedItem == 0,
-                    onClick = { selectedItem = 0 /* TODO: Navegar a la pantalla de inicio */ },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 1,
-                    onClick = {
-                        selectedItem = 1
-                        navController.navigate("category_screen")
-                    },
-                    icon = { Icon(Icons.Filled.Apps, contentDescription = "Categorías") },
-                    label = { Text("Categorias") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 2,
-                    onClick = {
-                        selectedItem = 2
-                        navController.navigate("search_screen")
-                    },
-                    icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
-                    label = { Text("Buscar") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 3,
-                    onClick = {
-                        selectedItem = 3
-                        navController.navigate("cart_screen")
-                    },
-                    icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
-                    label = { Text("Carrito") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 4,
-                    onClick = {
-                        selectedItem = 4
-                        navController.navigate("account_screen")
-                    },
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "Cuenta") },
-                    label = { Text("Cuenta") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-            }
-        }
-    ) { paddingValues ->
-        LazyColumn(
+                actionIconContentColor = MaterialTheme.colorScheme.onBackground
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        // Campo de búsqueda movido aquí, debajo de la TopAppBar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
+            singleLine = true,
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .fillMaxWidth()
+                .height(60.dp)
+                .padding(vertical = 4.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                errorContainerColor = Color.White
+            )
+        )
+        Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el campo de búsqueda y el texto
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize() // Ocupa el resto del espacio
         ) {
             item {
                 Row(
@@ -285,7 +205,6 @@ fun HomeScreen(
 @Composable
 fun PreviewHomeScreen() {
     MaisonFlowersTheme {
-        // En preview, se crea una instancia del ViewModel directamente para la previsualización / error temporal hasta crear el ViewModel real
-        HomeScreen(navController = rememberNavController(), cartViewModel = CartViewModel())
+        HomeScreen(navController = rememberNavController(), cartViewModel = CartViewModel(), paddingValues = PaddingValues(0.dp))
     }
 }

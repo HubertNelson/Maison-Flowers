@@ -29,18 +29,18 @@ import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.FlowerProduct
 import com.example.maisonflowers.ui.components.ProductCard
-import com.example.maisonflowers.ui.viewmodels.CartViewModel // Importa el ViewModel
+import com.example.maisonflowers.ui.viewmodels.CartViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
     navController: NavController,
-    cartViewModel: CartViewModel // Sin default `viewModel()` aquí para que NavGraph lo pase!
+    cartViewModel: CartViewModel,
+    paddingValues: PaddingValues // ¡Nuevo parámetro!
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var selectedItem by remember { mutableIntStateOf(2) }
+    // var selectedItem by remember { mutableIntStateOf(2) } // ¡Eliminado, gestionado externamente!
 
-    // Datos de productos de ejemplo para la búsqueda
     val allProducts = remember {
         listOf(
             FlowerProduct("Classic Red Roses", "S/ 85.00", R.drawable.logomaison),
@@ -57,10 +57,9 @@ fun SearchScreen(
         )
     }
 
-    // La búsqueda ignora mayúsculas/minúsculas y busca en el nombre.
     val filteredProducts = remember(searchQuery) {
         if (searchQuery.isBlank()) {
-            emptyList() // No mostrar resultados si la búsqueda está vacía
+            emptyList()
         } else {
             allProducts.filter { product ->
                 product.name.contains(searchQuery, ignoreCase = true) ||
@@ -69,223 +68,120 @@ fun SearchScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Buscar",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+    // El Scaffold principal se ha movido a MaisonFlowersApp.
+    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Buscar",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                },
-                actions = {
-                    // icono de filtro, en caso de usarlo
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        bottomBar = {
-            NavigationBar(
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
-            ) {
-                NavigationBarItem(
-                    selected = selectedItem == 0,
-                    onClick = {
-                        selectedItem = 0
-                        navController.navigate("home_screen") {
-                            // Limpia el back stack hasta home_screen si ya existe,
-                            // evitando múltiples instancias y permitiendo volver a la raíz.
-                            popUpTo("home_screen") { inclusive = true }
-                        }
-                    },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 1,
-                    onClick = {
-                        selectedItem = 1
-                        navController.navigate("category_screen") {
-                            popUpTo("category_screen") { inclusive = true }
-                        }
-                    },
-                    icon = { Icon(Icons.Filled.Apps, contentDescription = "Categorías") },
-                    label = { Text("Categorias") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 2,
-                    onClick = { selectedItem = 2 /* Ya está en la pantalla de búsqueda */ },
-                    icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
-                    label = { Text("Buscar") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 3,
-                    onClick = {
-                        selectedItem = 3
-                        navController.navigate("cart_screen")
-                    },
-                    icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
-                    label = { Text("Carrito") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 4,
-                    onClick = {
-                        selectedItem = 4
-                        navController.navigate("account_screen")
-                    },
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "Cuenta") },
-                    label = { Text("Cuenta") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-            }
-        }
-    ) { paddingValues ->
-        Column(
+                titleContentColor = MaterialTheme.colorScheme.onBackground,
+                actionIconContentColor = MaterialTheme.colorScheme.onBackground
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Buscar flores, ramos, colores...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
+            singleLine = true,
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Campo de búsqueda principal
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar flores, ramos, colores...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+                .fillMaxWidth()
+                .height(60.dp)
+                .padding(vertical = 4.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White,
+                errorContainerColor = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (searchQuery.isBlank()) {
+            Text(
+                text = "Empieza a escribir para buscar tus flores...",
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                fontSize = 16.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(24.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    errorContainerColor = Color.White
-                )
+                    .padding(vertical = 16.dp),
+                textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Lógica para mostrar mensajes según el estado de la búsqueda
-            if (searchQuery.isBlank()) {
-                // Mensaje cuando el campo de búsqueda está vacío
+        } else if (filteredProducts.isNotEmpty()) {
+            Text(
+                text = "${filteredProducts.size} resultados encontrados",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                textAlign = TextAlign.Start
+            )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.fillMaxSize(), // Ocupa el resto del espacio
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(filteredProducts) { product ->
+                    ProductCard(
+                        product = product,
+                        onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
+                        onAddToCart = { productToAdd ->
+                            cartViewModel.addItem(productToAdd)
+                        }
+                    )
+                }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(), // Ocupa el resto del espacio
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = "Empieza a escribir para buscar tus flores...",
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                    fontSize = 16.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    textAlign = TextAlign.Center
-                )
-                //  añadir secciones de "Búsquedas Recientes" o "Búsquedas Populares"
-            } else if (filteredProducts.isNotEmpty()) {
-                // Contador de resultados si hay una búsqueda activa y se encontraron productos
-                Text(
-                    text = "${filteredProducts.size} resultados encontrados",
+                    text = "Lo sentimos, no encontramos resultados para \"$searchQuery\".",
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-                // Cuadrícula de productos filtrados
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    items(filteredProducts) { product ->
-                        ProductCard(
-                            product = product,
-                            onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
-                            onAddToCart = { productToAdd ->
-                                cartViewModel.addItem(productToAdd)
-                            }
-                        )
-                    }
-                }
-            } else {
-                // Mensaje si no hay resultados para la búsqueda específica
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = "Lo sentimos, no encontramos resultados para \"$searchQuery\".",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        text = "Intenta con otras palabras o revisa la ortografía.",
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    text = "Intenta con otras palabras o revisa la ortografía.",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
@@ -295,7 +191,6 @@ fun SearchScreen(
 @Composable
 fun PreviewSearchScreen() {
     MaisonFlowersTheme {
-        // En preview, se crea una instancia del ViewModel directamente para la previsualización / error temporal hasta crear el ViewModel real
-        SearchScreen(navController = rememberNavController(), cartViewModel = CartViewModel())
+        SearchScreen(navController = rememberNavController(), cartViewModel = CartViewModel(), paddingValues = PaddingValues(0.dp))
     }
 }

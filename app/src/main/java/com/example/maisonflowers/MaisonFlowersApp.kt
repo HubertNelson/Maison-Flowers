@@ -3,18 +3,127 @@ package com.example.maisonflowers
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.ui.navigation.NavGraph
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
+import com.example.maisonflowers.ui.viewmodels.CartViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-class MaisonFlowersApp : ComponentActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaisonFlowersTheme {
-                val navController = rememberNavController()
-                NavGraph(navController = navController)
+                // Aseguramos que la Surface principal ocupe todo el espacio
+                // y aplique el color de fondo definido en MaterialTheme.colorScheme.background
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    MaisonFlowersApp()
+                }
             }
         }
+    }
+}
+
+@Composable
+fun MaisonFlowersApp() {
+    val navController = rememberNavController()
+    val cartViewModel: CartViewModel = viewModel()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    // Define las rutas donde la barra de navegación debe ser visible
+    val showBottomBar = currentRoute in listOf(
+        "home_screen",
+        "category_screen",
+        "search_screen",
+        "cart_screen",
+        "account_screen"
+    )
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.background, // Usar el color de fondo del tema para la barra
+                    contentColor = MaterialTheme.colorScheme.onBackground
+                ) {
+                    val navItems = listOf(
+                        "home_screen" to Pair(Icons.Filled.Home, "Home"),
+                        "category_screen" to Pair(Icons.Filled.Apps, "Categories"),
+                        "search_screen" to Pair(Icons.Filled.Search, "Search"),
+                        "cart_screen" to Pair(Icons.Filled.ShoppingCart, "Cart"),
+                        "account_screen" to Pair(Icons.Filled.Person, "Account")
+                    )
+
+                    navItems.forEachIndexed { index, (route, iconLabel) ->
+                        val isSelected = currentRoute?.startsWith(route) == true
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = {
+                                if (!isSelected) {
+                                    navController.navigate(route) {
+                                        popUpTo(navController.graph.startDestinationId) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
+                            },
+                            icon = { Icon(iconLabel.first, contentDescription = iconLabel.second) },
+                            label = { Text(iconLabel.second) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onBackground,
+                                unselectedTextColor = MaterialTheme.colorScheme.onBackground,
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    ) { paddingValues ->
+        NavGraph(
+            navController = navController,
+            cartViewModel = cartViewModel,
+            paddingValues = paddingValues
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DefaultPreview() {
+    MaisonFlowersTheme {
+        MaisonFlowersApp()
     }
 }

@@ -47,14 +47,6 @@ fun SplashScreen(navController: NavController) {
                     .size(250.dp)
                     .padding(bottom = 16.dp)
             )
-            Text(
-                text = "(˶ˆᗜˆ˵)",
-                style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.onBackground),
-                fontSize = 70.sp,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(0.9f)
-            )
         }
     }
 }

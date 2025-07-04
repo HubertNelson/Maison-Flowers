@@ -40,9 +40,10 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 @Composable
 fun CategoryScreen(
     navController: NavController,
-    cartViewModel: CartViewModel // Sin default `viewModel()` aquí para que NavGraph lo pase!
+    cartViewModel: CartViewModel,
+    paddingValues: PaddingValues // ¡Nuevo parámetro!
 ) {
-    var selectedItem by remember { mutableIntStateOf(1) } // 1 para categorias
+    // var selectedItem by remember { mutableIntStateOf(1) } // ¡Eliminado, gestionado externamente!
 
     val categories = remember {
         listOf(
@@ -57,130 +58,43 @@ fun CategoryScreen(
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Categorías",
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp
+    // El Scaffold principal se ha movido a MaisonFlowersApp.
+    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        TopAppBar(
+            title = {
+                Text(
+                    text = "Categorías",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            },
+            navigationIcon = {
+                IconButton(onClick = { navController.popBackStack() }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Volver",
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    titleContentColor = MaterialTheme.colorScheme.onBackground,
-                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        bottomBar = {
-            NavigationBar(
+                }
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onBackground
-            ) {
-                NavigationBarItem(
-                    selected = selectedItem == 0,
-                    onClick = {
-                        selectedItem = 0
-                        navController.navigate("home_screen") {
-                            popUpTo("home_screen") { inclusive = true }
-                        }
-                    },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
-                    label = { Text("Inicio") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 1,
-                    onClick = {
-                        selectedItem = 1 // Ya está en categorías.
-                    },
-                    icon = { Icon(Icons.Filled.Apps, contentDescription = "Categorías") },
-                    label = { Text("Categorias") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 2,
-                    onClick = {
-                        selectedItem = 2
-                        navController.navigate("search_screen")
-                    },
-                    icon = { Icon(Icons.Filled.Search, contentDescription = "Buscar") },
-                    label = { Text("Buscar") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 3,
-                    onClick = {
-                        selectedItem = 3
-                        navController.navigate("cart_screen")
-                    },
-                    icon = { Icon(Icons.Filled.ShoppingCart, contentDescription = "Carrito") },
-                    label = { Text("Carrito") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = selectedItem == 4,
-                    onClick = {
-                        selectedItem = 4
-                        navController.navigate("account_screen")
-                    },
-                    icon = { Icon(Icons.Filled.Person, contentDescription = "Cuenta") },
-                    label = { Text("Cuenta") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = MaterialTheme.colorScheme.primary,
-                        selectedTextColor = MaterialTheme.colorScheme.primary,
-                        unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                        unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                        indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                )
-            }
-        }
-    ) { paddingValues ->
+                titleContentColor = MaterialTheme.colorScheme.onBackground,
+                actionIconContentColor = MaterialTheme.colorScheme.onBackground
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxSize(), // Ocupa el resto del espacio
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -197,7 +111,6 @@ fun CategoryScreen(
 @Composable
 fun PreviewCategoryScreen() {
     MaisonFlowersTheme {
-        // se crea una instancia del ViewModel directamente para la previsualización / error temporal hasta crear el ViewModel real.
-        CategoryScreen(navController = rememberNavController(), cartViewModel = CartViewModel())
+        CategoryScreen(navController = rememberNavController(), cartViewModel = CartViewModel(), paddingValues = PaddingValues(0.dp))
     }
 }
