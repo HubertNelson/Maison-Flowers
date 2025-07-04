@@ -57,7 +57,7 @@ data class UserProfile(
 @Composable
 fun AccountScreen(
     navController: NavController,
-    paddingValues: PaddingValues // ¡Nuevo parámetro!
+    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
 ) {
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -105,10 +105,8 @@ fun AccountScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -129,7 +127,7 @@ fun AccountScreen(
                 }
             },
             actions = {
-                IconButton(onClick = { /* TODO: Navegar a ajustes de la app */ }) {
+                IconButton(onClick = { /* TODO: Navegar a SettingsScreen */ }) { // Cambiado a SettingsScreen
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Ajustes de la App",
@@ -144,183 +142,200 @@ fun AccountScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         )
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "Mi Perfil",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            textAlign = TextAlign.Start
-        )
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.padding(16.dp))
-        } else if (errorMessage != null) {
-            Text(
-                text = errorMessage ?: "Error desconocido",
-                color = MaterialTheme.colorScheme.error,
-                modifier = Modifier.padding(16.dp)
-            )
-        } else {
-            userProfile?.let { profile ->
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.logomaison),
-                            contentDescription = "Foto de Perfil",
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(CircleShape)
-                                .background(Color.LightGray)
-                                .padding(bottom = 16.dp),
-                            contentScale = ContentScale.Crop
-                        )
+                .fillMaxSize()
+                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
+                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno
+        ) {
+            item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio inicial
 
-                        ProfileDetailRow(label = "Nombre:", value = profile.username)
-                        ProfileDetailRow(label = "Email:", value = profile.email)
-                        ProfileDetailRow(label = "Teléfono:", value = profile.phoneNumber)
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = { /* TODO: Navegar a pantalla de edición de perfil */ },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                            shape = RoundedCornerShape(8.dp),
+            item {
+                Text(
+                    text = "Mi Perfil",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.padding(16.dp))
+                } else if (errorMessage != null) {
+                    Text(
+                        text = errorMessage ?: "Error desconocido",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    userProfile?.let { profile ->
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Edit, contentDescription = "Editar Perfil")
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Editar Perfil", color = MaterialTheme.colorScheme.onPrimary)
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.logomaison),
+                                    contentDescription = "Foto de Perfil",
+                                    modifier = Modifier
+                                        .size(96.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.LightGray)
+                                        .padding(bottom = 16.dp),
+                                    contentScale = ContentScale.Crop
+                                )
+
+                                ProfileDetailRow(label = "Nombre:", value = profile.username)
+                                ProfileDetailRow(label = "Email:", value = profile.email)
+                                ProfileDetailRow(label = "Teléfono:", value = profile.phoneNumber)
+
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    onClick = { /* TODO: Navegar a pantalla de edición de perfil */ },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                                    shape = RoundedCornerShape(8.dp),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Editar Perfil")
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("Editar Perfil", color = MaterialTheme.colorScheme.onPrimary)
+                                }
+                            }
                         }
                     }
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            item {
+                Text(
+                    text = "Mis Pedidos",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+                AccountSectionItem(
+                    text = "Ver Historial de Pedidos",
+                    icon = Icons.Default.History
+                ) { /* TODO: Navegar a historial de pedidos */ }
+                AccountSectionItem(
+                    text = "Pedidos Pendientes/Activos",
+                    icon = Icons.Default.ListAlt
+                ) { /* TODO: Navegar a pedidos pendientes/activos */ }
+            }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            item {
+                Text(
+                    text = "Configuración y Ajustes",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+                AccountSectionItem(
+                    text = "Mis Direcciones",
+                    icon = Icons.Default.LocationOn
+                ) { /* TODO: Navegar a gestión de direcciones */ }
+                AccountSectionItem(
+                    text = "Métodos de Pago",
+                    icon = Icons.Default.Payment
+                ) { /* TODO: Navegar a métodos de pago */ }
+                AccountSectionItem(
+                    text = "Notificaciones",
+                    icon = Icons.Default.Notifications
+                ) { /* TODO: Navegar a configuraciones de notificaciones */ }
+                AccountSectionItem(
+                    text = "Cambiar Contraseña",
+                    icon = Icons.Default.Lock
+                ) { /* TODO: Navegar a pantalla de cambio de contraseña */ }
+            }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            item {
+                Text(
+                    text = "Soporte y Legal",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+                AccountSectionItem(
+                    text = "Ayuda y Soporte",
+                    icon = Icons.Default.Help
+                ) { /* TODO: Navegar a sección de ayuda */ }
+                AccountSectionItem(
+                    text = "Acerca de la App",
+                    icon = Icons.Default.Info
+                ) { /* TODO: Navegar a sección 'Acerca de' */ }
+            }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
+
+            item {
+                Text(
+                    text = "Acciones Clave",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    textAlign = TextAlign.Start
+                )
+                Button(
+                    onClick = onLogoutClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(56.dp)
+                ) {
+                    Icon(Icons.Default.Logout, contentDescription = "Cerrar Sesión")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Cerrar Sesión", color = MaterialTheme.colorScheme.onError)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onDeleteAccountClick,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)),
+                    shape = RoundedCornerShape(24.dp),
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(56.dp)
+                ) {
+                    Icon(Icons.Default.DeleteForever, contentDescription = "Eliminar Cuenta")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Eliminar Cuenta", color = Color.White)
+                }
+            }
+
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Mis Pedidos",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            textAlign = TextAlign.Start
-        )
-        AccountSectionItem(
-            text = "Ver Historial de Pedidos",
-            icon = Icons.Default.History
-        ) { /* TODO: Navegar a historial de pedidos */ }
-        AccountSectionItem(
-            text = "Pedidos Pendientes/Activos",
-            icon = Icons.Default.ListAlt
-        ) { /* TODO: Navegar a pedidos pendientes/activos */ }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Configuración y Ajustes",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            textAlign = TextAlign.Start
-        )
-        AccountSectionItem(
-            text = "Mis Direcciones",
-            icon = Icons.Default.LocationOn
-        ) { /* TODO: Navegar a gestión de direcciones */ }
-        AccountSectionItem(
-            text = "Métodos de Pago",
-            icon = Icons.Default.Payment
-        ) { /* TODO: Navegar a métodos de pago */ }
-        AccountSectionItem(
-            text = "Notificaciones",
-            icon = Icons.Default.Notifications
-        ) { /* TODO: Navegar a configuraciones de notificaciones */ }
-        AccountSectionItem(
-            text = "Cambiar Contraseña",
-            icon = Icons.Default.Lock
-        ) { /* TODO: Navegar a pantalla de cambio de contraseña */ }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Soporte y Legal",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            textAlign = TextAlign.Start
-        )
-        AccountSectionItem(
-            text = "Ayuda y Soporte",
-            icon = Icons.Default.Help
-        ) { /* TODO: Navegar a sección de ayuda */ }
-        AccountSectionItem(
-            text = "Acerca de la App",
-            icon = Icons.Default.Info
-        ) { /* TODO: Navegar a sección 'Acerca de' */ }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Acciones Clave",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 22.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            textAlign = TextAlign.Start
-        )
-        Button(
-            onClick = onLogoutClick,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(56.dp)
-        ) {
-            Icon(Icons.Default.Logout, contentDescription = "Cerrar Sesión")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Cerrar Sesión", color = MaterialTheme.colorScheme.onError)
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = onDeleteAccountClick,
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)),
-            shape = RoundedCornerShape(24.dp),
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .height(56.dp)
-        ) {
-            Icon(Icons.Default.DeleteForever, contentDescription = "Eliminar Cuenta")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Eliminar Cuenta", color = Color.White)
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
@@ -396,7 +411,6 @@ fun PreviewAccountScreen() {
     MaisonFlowersTheme {
         AccountScreen(
             navController = rememberNavController(),
-            // Proporcionar valores de ejemplo para los parámetros
             paddingValues = PaddingValues(0.dp)
         )
     }

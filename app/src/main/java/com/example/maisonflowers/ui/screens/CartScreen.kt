@@ -48,10 +48,8 @@ data class CartItem(
 fun CartScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // ¡Nuevo parámetro!
+    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
 ) {
-    // var selectedItem by remember { mutableIntStateOf(3) } // ¡Eliminado, gestionado externamente!
-
     val cartItems = cartViewModel.cartItems
 
     val subtotal = cartItems.sumOf { item ->
@@ -62,15 +60,11 @@ fun CartScreen(
     val shippingCost = if (subtotal > 0) 15.00 else 0.00
     val total = subtotal + shippingCost
 
-    // El Scaffold principal se ha movido a MaisonFlowersApp.
-    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -99,7 +93,9 @@ fun CartScreen(
         )
         if (cartItems.isEmpty()) {
             Column(
-                modifier = Modifier.fillMaxSize(), // Ocupa el resto del espacio
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = paddingValues.calculateBottomPadding()), // Solo padding inferior
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -139,7 +135,9 @@ fun CartScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier.weight(1f), // Ocupa el resto del espacio
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(cartItems) { item ->
@@ -160,7 +158,10 @@ fun CartScreen(
                 shape = RoundedCornerShape(12.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno
+                    .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     OrderSummaryRow(label = "Subtotal:", value = "S/ %.2f".format(subtotal))

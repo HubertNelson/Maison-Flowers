@@ -41,10 +41,9 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 fun HomeScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // ¡Nuevo parámetro!
+    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    // var selectedItem by remember { mutableIntStateOf(0) } // ¡Eliminado, gestionado externamente!
 
     val categories = remember {
         listOf(
@@ -65,58 +64,59 @@ fun HomeScreen(
         )
     }
 
-    // El Scaffold principal se ha movido a MaisonFlowersApp.
-    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
+    // El contenido principal de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        // El paddingValues se aplicará a la LazyColumn de abajo para evitar que el contenido sea cubierto por la barra inferior
+        // y para que el contenido superior (buscador/engranaje) quede pegado arriba.
     ) {
-        TopAppBar(
-            title = { /* Vacio */ },
-            navigationIcon = { /* Vacio */ },
-            actions = {
-                IconButton(onClick = { /* TODO: Navegar a configuración de la app */ }) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Configuración",
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                actionIconContentColor = MaterialTheme.colorScheme.onBackground
-            ),
-            modifier = Modifier.fillMaxWidth()
-        )
-        // Campo de búsqueda movido aquí, debajo de la TopAppBar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
-            singleLine = true,
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+        // Contenedor para el buscador y el engranaje
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(24.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
-                cursorColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                errorContainerColor = Color.White
+                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno para esta fila
+                .padding(top = paddingValues.calculateTopPadding()), // Aplica el padding superior del Scaffold aquí
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween // Espacia los elementos
+        ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
+                singleLine = true,
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+                modifier = Modifier
+                    .weight(1f) // Ocupa el espacio disponible y empuja el icono a la derecha
+                    .height(60.dp)
+                    .padding(vertical = 4.dp), // Espacio entre el campo y el icono
+                shape = RoundedCornerShape(24.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedContainerColor = Color.White,
+                    unfocusedContainerColor = Color.White,
+                    errorContainerColor = Color.White
+                )
             )
-        )
-        Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el campo de búsqueda y el texto
+            IconButton(onClick = { /* TODO: Navegar a SettingsScreen */ }) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = "Configuración",
+                    tint = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.size(28.dp) // Ajusta el tamaño del icono si es necesario
+                )
+            }
+        }
 
+        // El resto del contenido de la pantalla, aplicando solo el padding inferior del Scaffold
         LazyColumn(
-            modifier = Modifier.fillMaxSize() // Ocupa el resto del espacio
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo aplica el padding inferior
+                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno para el contenido
         ) {
             item {
                 Row(

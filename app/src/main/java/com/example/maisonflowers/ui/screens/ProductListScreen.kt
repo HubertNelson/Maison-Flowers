@@ -41,10 +41,9 @@ fun ProductListScreen(
     navController: NavController,
     categoryName: String?,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // ¡Nuevo parámetro!
+    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    // var selectedItem by remember { mutableIntStateOf(1) } // ¡Eliminado, gestionado externamente!
 
     val products = remember(categoryName) {
         when (categoryName) {
@@ -72,14 +71,11 @@ fun ProductListScreen(
         }
     }
 
-    // El Scaffold principal se ha movido a MaisonFlowersApp.
-    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -116,7 +112,7 @@ fun ProductListScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .padding(vertical = 4.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp), // Aplicar padding horizontal aquí
             shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -134,12 +130,16 @@ fun ProductListScreen(
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp) // Padding para el texto
         )
 
+        // Aplicar paddingValues solo al contenido debajo de la TopAppBar y el buscador
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(), // Ocupa el resto del espacio
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
+                .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno para la grid
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

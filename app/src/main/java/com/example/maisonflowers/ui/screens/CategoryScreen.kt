@@ -41,10 +41,8 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 fun CategoryScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // ¡Nuevo parámetro!
+    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
 ) {
-    // var selectedItem by remember { mutableIntStateOf(1) } // ¡Eliminado, gestionado externamente!
-
     val categories = remember {
         listOf(
             FlowerCategory("ROSAS", R.drawable.logomaison),
@@ -58,14 +56,11 @@ fun CategoryScreen(
         )
     }
 
-    // El Scaffold principal se ha movido a MaisonFlowersApp.
-    // Aquí solo definimos el TopAppBar y el contenido de la pantalla.
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues) // ¡Aplicar paddingValues del Scaffold externo!
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+        // No aplicar paddingValues aquí, la TopAppBar debe ir arriba
     ) {
         TopAppBar(
             title = {
@@ -92,9 +87,13 @@ fun CategoryScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+        // Aplicar paddingValues solo al contenido debajo de la TopAppBar
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
-            modifier = Modifier.fillMaxSize(), // Ocupa el resto del espacio
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
+                .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
