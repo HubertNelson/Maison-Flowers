@@ -90,11 +90,11 @@ fun MaisonFlowersApp(themeManager: ThemeManager) { // Recibe themeManager
                     contentColor = MaterialTheme.colorScheme.onBackground
                 ) {
                     val navItems = listOf(
-                        "home_screen" to Pair(Icons.Filled.Home, "Home"),
-                        "category_screen" to Pair(Icons.Filled.Apps, "Categories"),
-                        "search_screen" to Pair(Icons.Filled.Search, "Search"),
-                        "cart_screen" to Pair(Icons.Filled.ShoppingCart, "Cart"),
-                        "account_screen" to Pair(Icons.Filled.Person, "Account")
+                        "home_screen" to Pair(Icons.Filled.Home, "Inicio"),
+                        "category_screen" to Pair(Icons.Filled.Apps, "Categorias"),
+                        "search_screen" to Pair(Icons.Filled.Search, "Buscar"),
+                        "cart_screen" to Pair(Icons.Filled.ShoppingCart, "Carrito"),
+                        "account_screen" to Pair(Icons.Filled.Person, "Cuenta")
                     )
 
                     navItems.forEachIndexed { index, (route, iconLabel) ->

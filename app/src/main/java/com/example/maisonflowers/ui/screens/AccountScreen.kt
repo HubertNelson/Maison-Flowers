@@ -199,7 +199,7 @@ fun AccountScreen(
 
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Button(
-                                    onClick = { /* TODO: Navegar a pantalla de edición de perfil */ },
+                                    onClick = { navController.navigate("edit_profile_screen") },
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                                     shape = RoundedCornerShape(8.dp),
                                     modifier = Modifier.fillMaxWidth()

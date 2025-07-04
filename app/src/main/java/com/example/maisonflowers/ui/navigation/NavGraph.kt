@@ -24,6 +24,7 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.maisonflowers.ui.screens.SettingsScreen
 import com.example.maisonflowers.data.ThemeManager
+import com.example.maisonflowers.ui.screens.EditProfileScreen
 
 @Composable
 fun NavGraph(
@@ -103,6 +104,10 @@ fun NavGraph(
 
         composable("settings_screen") {
             SettingsScreen(navController = navController, paddingValues = paddingValues, themeManager = themeManager)
+        }
+
+        composable("edit_profile_screen") {
+            EditProfileScreen(navController = navController, paddingValues = paddingValues)
         }
     }
 }
