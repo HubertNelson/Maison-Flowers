@@ -22,6 +22,7 @@ import com.example.maisonflowers.ui.screens.SearchScreen
 import com.example.maisonflowers.ui.screens.CartScreen
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.maisonflowers.ui.screens.SettingsScreen
 
 @Composable
 fun NavGraph(
@@ -96,6 +97,10 @@ fun NavGraph(
 
         composable("cart_screen") {
             CartScreen(navController = navController, cartViewModel = cartViewModel, paddingValues = paddingValues)
+        }
+
+        composable("settings_screen") {
+            SettingsScreen(navController = navController, paddingValues = paddingValues)
         }
     }
 }

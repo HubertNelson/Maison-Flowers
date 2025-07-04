@@ -127,7 +127,7 @@ fun AccountScreen(
                 }
             },
             actions = {
-                IconButton(onClick = { /* TODO: Navegar a SettingsScreen */ }) { // Cambiado a SettingsScreen
+                IconButton(onClick = { navController.navigate("settings_screen") }) { // Cambiado a SettingsScreen
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Ajustes de la App",

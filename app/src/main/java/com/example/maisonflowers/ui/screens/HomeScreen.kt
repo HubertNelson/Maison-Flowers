@@ -101,7 +101,7 @@ fun HomeScreen(
                     errorContainerColor = Color.White
                 )
             )
-            IconButton(onClick = { /* TODO: Navegar a SettingsScreen */ }) {
+            IconButton(onClick = { navController.navigate("settings_screen") }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Configuración",
