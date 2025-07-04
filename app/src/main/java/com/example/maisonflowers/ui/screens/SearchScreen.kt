@@ -36,7 +36,7 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 fun SearchScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -71,7 +71,6 @@ fun SearchScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -101,21 +100,23 @@ fun SearchScreen(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Buscar flores, ramos, colores...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
+            placeholder = { Text("Buscar flores, ramos, colores...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
             singleLine = true,
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .padding(horizontal = 16.dp, vertical = 4.dp), // Aplicar padding horizontal aquí
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                errorContainerColor = Color.White
+                focusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                errorContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                focusedTextColor = MaterialTheme.colorScheme.onSurface, // Color del texto de entrada
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface // Color del texto de entrada
             )
         )
 
@@ -128,8 +129,8 @@ fun SearchScreen(
                 fontSize = 16.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
-                    .padding(horizontal = 16.dp, vertical = 16.dp), // Padding interno
+                    .padding(bottom = paddingValues.calculateBottomPadding())
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
                 textAlign = TextAlign.Center
             )
         } else if (filteredProducts.isNotEmpty()) {
@@ -140,15 +141,15 @@ fun SearchScreen(
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, bottom = 16.dp), // Padding para el texto
+                    .padding(start = 16.dp, bottom = 16.dp),
                 textAlign = TextAlign.Start
             )
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
-                    .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno para la grid
+                    .padding(bottom = paddingValues.calculateBottomPadding())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
@@ -166,7 +167,7 @@ fun SearchScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = paddingValues.calculateBottomPadding()), // Solo padding inferior
+                    .padding(bottom = paddingValues.calculateBottomPadding()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {

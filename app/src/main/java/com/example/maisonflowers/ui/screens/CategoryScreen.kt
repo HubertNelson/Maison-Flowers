@@ -41,7 +41,7 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 fun CategoryScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues
 ) {
     val categories = remember {
         listOf(
@@ -60,7 +60,6 @@ fun CategoryScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // No aplicar paddingValues aquí, la TopAppBar debe ir arriba
     ) {
         TopAppBar(
             title = {
@@ -87,13 +86,12 @@ fun CategoryScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         )
-        // Aplicar paddingValues solo al contenido debajo de la TopAppBar
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
-                .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

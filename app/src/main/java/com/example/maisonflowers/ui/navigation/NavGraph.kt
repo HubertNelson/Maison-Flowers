@@ -23,12 +23,14 @@ import com.example.maisonflowers.ui.screens.CartScreen
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.maisonflowers.ui.screens.SettingsScreen
+import com.example.maisonflowers.data.ThemeManager
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues, // recibe los paddingValues del Scaffold externo
+    themeManager: ThemeManager
 ) {
     // Obtener una única instancia de CartViewModel a nivel de NavGraph.
     // Esta instancia persistirá mientras el NavHost esté activo y será compartida.
@@ -100,7 +102,7 @@ fun NavGraph(
         }
 
         composable("settings_screen") {
-            SettingsScreen(navController = navController, paddingValues = paddingValues)
+            SettingsScreen(navController = navController, paddingValues = paddingValues, themeManager = themeManager)
         }
     }
 }

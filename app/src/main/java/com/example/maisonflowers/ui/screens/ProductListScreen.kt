@@ -41,7 +41,7 @@ fun ProductListScreen(
     navController: NavController,
     categoryName: String?,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -75,7 +75,6 @@ fun ProductListScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -102,44 +101,44 @@ fun ProductListScreen(
             ),
             modifier = Modifier.fillMaxWidth()
         )
-        // Campo de búsqueda movido aquí, debajo de la TopAppBar
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Buscar...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
+            placeholder = { Text("Buscar...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
             singleLine = true,
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
             modifier = Modifier
                 .fillMaxWidth()
                 .height(60.dp)
-                .padding(horizontal = 16.dp, vertical = 4.dp), // Aplicar padding horizontal aquí
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             shape = RoundedCornerShape(24.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                 cursorColor = MaterialTheme.colorScheme.primary,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White,
-                errorContainerColor = Color.White
+                focusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                errorContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                focusedTextColor = MaterialTheme.colorScheme.onSurface, // Color del texto de entrada
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface // Color del texto de entrada
             )
         )
-        Spacer(modifier = Modifier.height(16.dp)) // Espacio entre el campo de búsqueda y el texto
+        Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Lista de Productos (${products.size})",
             color = MaterialTheme.colorScheme.onBackground,
             fontSize = 18.sp,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp) // Padding para el texto
+            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
         )
 
-        // Aplicar paddingValues solo al contenido debajo de la TopAppBar y el buscador
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
-                .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno para la grid
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

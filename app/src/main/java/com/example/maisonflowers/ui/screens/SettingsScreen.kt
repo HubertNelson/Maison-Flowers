@@ -15,7 +15,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -26,18 +26,24 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
+import com.example.maisonflowers.data.ThemeManager
+import com.example.maisonflowers.data.ThemeMode
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues,
+    themeManager: ThemeManager
 ) {
+    val scope = rememberCoroutineScope()
+    val currentThemeMode by themeManager.themeMode.collectAsState(initial = ThemeMode.SYSTEM) // Observa el tema actual
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // No aplicar paddingValues aquí, la TopAppBar debe ir arriba
     ) {
         TopAppBar(
             title = {
@@ -65,23 +71,80 @@ fun SettingsScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Contenido de la pantalla de ajustes
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
-                .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno
-            verticalArrangement = Arrangement.spacedBy(8.dp) // Espacio entre ítems
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio inicial
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item {
                 SettingsSectionTitle(title = "Apariencia")
-                SettingsItem(
-                    text = "Tema de la aplicación",
-                    icon = Icons.Default.Palette,
-                    onClick = { /* TODO: Implementar cambio de tema (modo oscuro/claro) */ }
-                )
+                // Opción para cambiar el tema
+                Card(
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Palette,
+                                    contentDescription = "Tema de la aplicación",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = "Tema de la aplicación",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Radio Buttons para seleccionar el modo de tema
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            ThemeMode.values().forEach { mode ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { scope.launch { themeManager.saveThemeMode(mode) } }
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    RadioButton(
+                                        selected = (currentThemeMode == mode),
+                                        onClick = { scope.launch { themeManager.saveThemeMode(mode) } },
+                                        colors = RadioButtonDefaults.colors(
+                                            selectedColor = MaterialTheme.colorScheme.primary,
+                                            unselectedColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = when (mode) {
+                                            ThemeMode.SYSTEM -> "Seguir el sistema"
+                                            ThemeMode.LIGHT -> "Claro"
+                                            ThemeMode.DARK -> "Oscuro"
+                                        },
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontSize = 16.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             item { Spacer(modifier = Modifier.height(24.dp)) }
@@ -122,7 +185,7 @@ fun SettingsScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio final
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
@@ -183,6 +246,9 @@ fun SettingsItem(text: String, icon: ImageVector, onClick: () -> Unit) {
 @Composable
 fun PreviewSettingsScreen() {
     MaisonFlowersTheme {
-        SettingsScreen(navController = rememberNavController(), paddingValues = PaddingValues(0.dp))
+        // Para el preview, necesitamos una instancia simulada de ThemeManager
+        val context = androidx.compose.ui.platform.LocalContext.current
+        val themeManager = remember { ThemeManager(context) }
+        SettingsScreen(navController = rememberNavController(), paddingValues = PaddingValues(0.dp), themeManager = themeManager)
     }
 }

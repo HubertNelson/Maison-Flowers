@@ -11,6 +11,6 @@ val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
 // Nuevos colores personalizados para Maison Flowers
-val BackgroundLightPurple = Color(0xFFE9C9F6) // Color morado claro para el fondo
+val BackgroundLightPurple = Color(0xFFE9C9F6) // Color morado claro para el fondo (¡el que quieres!)
 val TextDarkPurple = Color(0xFF673AB7)       // Morado oscuro para el texto
 val ButtonAccentPurple = Color(0xFFAE5CFF)   // Morado vibrante para los botones de acento

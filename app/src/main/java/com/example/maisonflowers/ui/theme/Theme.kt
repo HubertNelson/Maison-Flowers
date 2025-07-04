@@ -12,19 +12,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 
+// Esquema de colores para el TEMA OSCURO
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
+    primary = Purple80, // Un color principal para el modo oscuro
+    onPrimary = Color.Black, // Texto sobre primary en oscuro
     secondary = PurpleGrey80,
     tertiary = Pink80,
-    background = Color(0xFF1C1B1F), // Fondo oscuro predeterminado de Material3
-    onBackground = Color(0xFFFFFBFE), // Color del texto sobre el fondo oscuro
-    surface = Color(0xFF1C1B1F),       // Superficie oscura predeterminada
-    onSurface = Color(0xFFFFFBFE)      // Color del texto sobre la superficie oscura
+    background = Color(0xFF121212), // Un gris muy oscuro para el fondo del modo oscuro
+    onBackground = Color(0xFFE0E0E0), // Texto claro sobre el fondo oscuro
+    surface = Color(0xFF1E1E1E),     // Superficies (cards, etc.) un poco más claras que el fondo
+    onSurface = Color(0xFFE0E0E0),   // Texto sobre superficies oscuras
+    error = Color(0xFFCF6679),
+    onError = Color.Black,
+    surfaceVariant = Color(0xFF424242), // Un tono más oscuro para variantes de superficie en modo oscuro
+    onSurfaceVariant = Color(0xFFBDBDBD) // Texto sobre variantes de superficie en modo oscuro
 )
 
+// Esquema de colores para el TEMA CLARO
 private val LightColorScheme = lightColorScheme(
-    primary = TextDarkPurple,       // Ahora el morado oscuro es el color principal para interacciones
-    onPrimary = Color.White,        // Texto blanco sobre el color primary
+    primary = ButtonAccentPurple, // Tu morado vibrante para el color principal de interacción (botones, etc.)
+    onPrimary = Color.White,      // Texto blanco sobre el color primary
 
     secondary = PurpleGrey40,
     onSecondary = Color.White,
@@ -32,17 +39,20 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40,
     onTertiary = Color.White,
 
-    background = ButtonAccentPurple, // ¡Ahora tu morado vibrante es el color de fondo!
-    onBackground = Color.White,      // Texto blanco sobre el fondo vibrante para mejor contraste
+    background = BackgroundLightPurple, // Tu color morado claro (0xFFE9C9F6) para el fondo principal
+    onBackground = TextDarkPurple,      // Tu morado oscuro para el texto sobre el fondo claro
 
-    surface = ButtonAccentPurple,    // Usamos el mismo color de fondo para las superficies (cards, etc.)
-    onSurface = Color.White          // Texto blanco sobre las superficies vibrantes
+    surface = Color.White,              // ¡CAMBIO AQUÍ! El fondo de las superficies (incluidos los buscadores) ahora es blanco en modo claro.
+    onSurface = TextDarkPurple,         // Tu morado oscuro para el texto sobre las superficies blancas
+    error = Color(0xFFB00020),
+    onError = Color.White,
+    surfaceVariant = Color(0xFFF0F0F0), // Un tono más claro para variantes de superficie en modo claro
+    onSurfaceVariant = TextDarkPurple.copy(alpha = 0.7f) // Texto más suave para variantes de superficie (placeholders)
 )
 
 @Composable
 fun MaisonFlowersTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -57,7 +67,7 @@ fun MaisonFlowersTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography, // Asegúrate de que Typography esté definido en tu proyecto
+        typography = Typography,
         content = content
     )
 }

@@ -41,7 +41,7 @@ import com.example.maisonflowers.ui.viewmodels.CartViewModel
 fun HomeScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
@@ -64,41 +64,39 @@ fun HomeScreen(
         )
     }
 
-    // El contenido principal de la pantalla
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // El paddingValues se aplicará a la LazyColumn de abajo para evitar que el contenido sea cubierto por la barra inferior
-        // y para que el contenido superior (buscador/engranaje) quede pegado arriba.
     ) {
-        // Contenedor para el buscador y el engranaje
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno para esta fila
-                .padding(top = paddingValues.calculateTopPadding()), // Aplica el padding superior del Scaffold aquí
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(top = paddingValues.calculateTopPadding()),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween // Espacia los elementos
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)) },
+                placeholder = { Text("Buscar flores, ramos...", color = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
                 singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Buscar", tint = MaterialTheme.colorScheme.onSurfaceVariant) }, // Usar onSurfaceVariant
                 modifier = Modifier
-                    .weight(1f) // Ocupa el espacio disponible y empuja el icono a la derecha
+                    .weight(1f)
                     .height(60.dp)
-                    .padding(vertical = 4.dp), // Espacio entre el campo y el icono
+                    .padding(end = 8.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                     cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White,
-                    errorContainerColor = Color.White
+                    focusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                    errorContainerColor = MaterialTheme.colorScheme.surface, // Usar color de superficie del tema
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface, // Color del texto de entrada
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface // Color del texto de entrada
                 )
             )
             IconButton(onClick = { navController.navigate("settings_screen") }) {
@@ -106,17 +104,16 @@ fun HomeScreen(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Configuración",
                     tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.size(28.dp) // Ajusta el tamaño del icono si es necesario
+                    modifier = Modifier.size(28.dp)
                 )
             }
         }
 
-        // El resto del contenido de la pantalla, aplicando solo el padding inferior del Scaffold
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo aplica el padding inferior
-                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno para el contenido
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             item {
                 Row(

@@ -48,7 +48,7 @@ data class CartItem(
 fun CartScreen(
     navController: NavController,
     cartViewModel: CartViewModel,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues
 ) {
     val cartItems = cartViewModel.cartItems
 
@@ -64,7 +64,6 @@ fun CartScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -95,7 +94,7 @@ fun CartScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(bottom = paddingValues.calculateBottomPadding()), // Solo padding inferior
+                    .padding(bottom = paddingValues.calculateBottomPadding()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -137,7 +136,7 @@ fun CartScreen(
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 8.dp), // Padding interno
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(cartItems) { item ->
@@ -156,12 +155,12 @@ fun CartScreen(
 
             Card(
                 shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // Usar color de superficie del tema
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno
-                    .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .padding(bottom = paddingValues.calculateBottomPadding())
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     OrderSummaryRow(label = "Subtotal:", value = "S/ %.2f".format(subtotal))
@@ -189,7 +188,6 @@ fun CartScreen(
     }
 }
 
-// Mantener CartItemCard y OrderSummaryRow como composables auxiliares
 @Composable
 fun CartItemCard(
     cartItem: CartItem,
@@ -198,7 +196,7 @@ fun CartItemCard(
 ) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // Usar color de superficie del tema
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -222,7 +220,7 @@ fun CartItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = cartItem.product.name,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = MaterialTheme.colorScheme.onSurface, // Usar onSurface para el texto
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2
@@ -230,7 +228,7 @@ fun CartItemCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Precio: ${cartItem.product.price}",
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, // Usar onSurfaceVariant
                     fontSize = 14.sp
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -242,18 +240,18 @@ fun CartItemCard(
                         onClick = { onQuantityChange(cartItem.quantity - 1) },
                         enabled = cartItem.quantity > 0
                     ) {
-                        Icon(Icons.Default.RemoveCircle, contentDescription = "Disminuir cantidad")
+                        Icon(Icons.Default.RemoveCircle, contentDescription = "Disminuir cantidad", tint = MaterialTheme.colorScheme.onSurface) // Usar onSurface
                     }
                     Text(
                         text = "${cartItem.quantity}",
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = MaterialTheme.colorScheme.onSurface, // Usar onSurface
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     IconButton(
                         onClick = { onQuantityChange(cartItem.quantity + 1) }
                     ) {
-                        Icon(Icons.Default.AddCircle, contentDescription = "Aumentar cantidad")
+                        Icon(Icons.Default.AddCircle, contentDescription = "Aumentar cantidad", tint = MaterialTheme.colorScheme.onSurface) // Usar onSurface
                     }
                 }
             }
@@ -295,13 +293,13 @@ fun OrderSummaryRow(label: String, value: String, isTotal: Boolean = false) {
     ) {
         Text(
             text = label,
-            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, // Usar onSurface
             fontSize = if (isTotal) 18.sp else 16.sp,
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal
         )
         Text(
             text = value,
-            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground,
+            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, // Usar onSurface
             fontSize = if (isTotal) 18.sp else 16.sp,
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal,
             textAlign = TextAlign.End

@@ -57,7 +57,7 @@ data class UserProfile(
 @Composable
 fun AccountScreen(
     navController: NavController,
-    paddingValues: PaddingValues // Recibe los paddingValues del Scaffold externo
+    paddingValues: PaddingValues
 ) {
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
     var isLoading by remember { mutableStateOf(true) }
@@ -106,7 +106,6 @@ fun AccountScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-        // No aplicar paddingValues aquí
     ) {
         TopAppBar(
             title = {
@@ -127,7 +126,7 @@ fun AccountScreen(
                 }
             },
             actions = {
-                IconButton(onClick = { navController.navigate("settings_screen") }) { // Cambiado a SettingsScreen
+                IconButton(onClick = { navController.navigate("settings_screen") }) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = "Ajustes de la App",
@@ -145,10 +144,10 @@ fun AccountScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding()) // Solo padding inferior
-                .padding(horizontal = 16.dp, vertical = 8.dp) // Padding interno
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(16.dp)) } // Espacio inicial
+            item { Spacer(modifier = Modifier.height(16.dp)) }
 
             item {
                 Text(
@@ -173,7 +172,7 @@ fun AccountScreen(
                     userProfile?.let { profile ->
                         Card(
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // Usar color de superficie del tema
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -189,7 +188,7 @@ fun AccountScreen(
                                     modifier = Modifier
                                         .size(96.dp)
                                         .clip(CircleShape)
-                                        .background(Color.LightGray)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant) // Usar un color de superficie variante del tema
                                         .padding(bottom = 16.dp),
                                     contentScale = ContentScale.Crop
                                 )
@@ -322,7 +321,7 @@ fun AccountScreen(
 
                 Button(
                     onClick = onDeleteAccountClick,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE57373)), // Mantener este color si es específico para eliminar
                     shape = RoundedCornerShape(24.dp),
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
@@ -339,7 +338,6 @@ fun AccountScreen(
     }
 }
 
-// Composable para una fila de detalle de perfil (sin cambios)
 @Composable
 fun ProfileDetailRow(label: String, value: String) {
     Row(
@@ -351,25 +349,24 @@ fun ProfileDetailRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurface, // Usar onSurface para el texto
             fontWeight = FontWeight.Medium,
             fontSize = 16.sp
         )
         Text(
             text = value,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, // Usar onSurfaceVariant para el valor
             fontSize = 16.sp,
             textAlign = TextAlign.End
         )
     }
 }
 
-// Composable para un ítem de sección de cuenta (sin cambios importantes, solo iconos)
 @Composable
 fun AccountSectionItem(text: String, icon: androidx.compose.ui.graphics.vector.ImageVector, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // Usar color de superficie del tema
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .fillMaxWidth()
@@ -391,7 +388,7 @@ fun AccountSectionItem(text: String, icon: androidx.compose.ui.graphics.vector.I
             Spacer(modifier = Modifier.width(16.dp))
             Text(
                 text = text,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = MaterialTheme.colorScheme.onSurface, // Usar onSurface para el texto
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Normal,
                 modifier = Modifier.weight(1f)
