@@ -29,7 +29,9 @@ import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.ProductCard
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
-import com.example.maisonflowers.models.FlowerProduct
+import com.example.maisonflowers.models.FlowerProduct // Importar la nueva FlowerProduct del modelo
+import com.google.firebase.firestore.FirebaseFirestore // Importar FirebaseFirestore
+import kotlinx.coroutines.tasks.await // Importar para usar .await() en tareas de Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,17 +42,40 @@ fun SearchScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
-    // La lista de todos los productos ahora estará vacía, se llenará desde Firestore
     val allProducts = remember { mutableStateListOf<FlowerProduct>() }
+    var isLoadingProducts by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // Cargar todos los productos desde Firestore
+    LaunchedEffect(Unit) { // Se ejecuta una vez
+        try {
+            val db = FirebaseFirestore.getInstance()
+            val result = db.collection("products")
+                .get()
+                .await()
 
-    val filteredProducts = remember(searchQuery, allProducts) { // Depende de allProducts
+            allProducts.clear()
+            for (document in result.documents) {
+                val product = document.toObject(FlowerProduct::class.java)
+                product?.let {
+                    allProducts.add(it)
+                }
+            }
+            isLoadingProducts = false
+        } catch (e: Exception) {
+            errorMessage = "Error al cargar productos para la búsqueda: ${e.message}"
+            isLoadingProducts = false
+            println("Error al cargar todos los productos: ${e.message}") // Para depuración
+        }
+    }
+
+    val filteredProducts = remember(searchQuery, allProducts) {
         if (searchQuery.isBlank()) {
-            emptyList()
+            emptyList() // No mostrar nada si la búsqueda está vacía
         } else {
             allProducts.filter { product ->
                 product.name.contains(searchQuery, ignoreCase = true) ||
-                        product.description.contains(searchQuery, ignoreCase = true) || // Buscar también en la descripción
+                        product.description.contains(searchQuery, ignoreCase = true) ||
                         product.category.contains(searchQuery, ignoreCase = true)
             }
         }
@@ -111,7 +136,18 @@ fun SearchScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (searchQuery.isBlank()) {
+        if (isLoadingProducts) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "Error desconocido",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+        } else if (searchQuery.isBlank()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -127,7 +163,29 @@ fun SearchScreen(
                     textAlign = TextAlign.Center
                 )
             }
-        } else if (filteredProducts.isNotEmpty()) {
+        } else if (filteredProducts.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = paddingValues.calculateBottomPadding()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Lo sentimos, no encontramos resultados para \"$searchQuery\".",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                Text(
+                    text = "Intenta con otras palabras o revisa la ortografía.",
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
             Text(
                 text = "${filteredProducts.size} resultados encontrados",
                 color = MaterialTheme.colorScheme.onBackground,
@@ -156,28 +214,6 @@ fun SearchScreen(
                         }
                     )
                 }
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = paddingValues.calculateBottomPadding()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "Lo sentimos, no encontramos resultados para \"$searchQuery\".",
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontSize = 18.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = "Intenta con otras palabras o revisa la ortografía.",
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }

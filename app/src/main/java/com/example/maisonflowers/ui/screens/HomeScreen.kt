@@ -1,5 +1,6 @@
 package com.example.maisonflowers.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,7 +17,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,7 +34,9 @@ import com.example.maisonflowers.ui.components.FlowerCategory
 import com.example.maisonflowers.ui.components.CategoryItem
 import com.example.maisonflowers.ui.components.ProductCard
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
-import com.example.maisonflowers.models.FlowerProduct
+import com.example.maisonflowers.models.FlowerProduct // Importar la nueva FlowerProduct del modelo
+import com.google.firebase.firestore.FirebaseFirestore // Importar FirebaseFirestore
+import kotlinx.coroutines.tasks.await // Importar para usar .await() en tareas de Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,8 +58,33 @@ fun HomeScreen(
         )
     }
 
-    // Las listas de productos populares ahora estarán vacías, se llenarán desde Firestore
     val popularProducts = remember { mutableStateListOf<FlowerProduct>() }
+    var isLoadingProducts by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Cargar productos populares desde Firestore
+    LaunchedEffect(Unit) { // Se ejecuta una vez cuando el Composable entra en la composición
+        try {
+            val db = FirebaseFirestore.getInstance()
+            val result = db.collection("products")
+                .whereEqualTo("isPopular", true) // Filtrar por productos populares
+                .get()
+                .await() // Esperar a que la tarea se complete
+
+            popularProducts.clear() // Limpiar la lista antes de añadir nuevos productos
+            for (document in result.documents) {
+                val product = document.toObject(FlowerProduct::class.java)
+                product?.let {
+                    popularProducts.add(it)
+                }
+            }
+            isLoadingProducts = false
+        } catch (e: Exception) {
+            errorMessage = "Error al cargar productos populares: ${e.message}"
+            isLoadingProducts = false
+            println("Error al cargar productos populares: ${e.message}") // Para depuración
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -167,19 +200,38 @@ fun HomeScreen(
                     )
                 }
 
-                // Mostrar productos populares desde la lista dinámica
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(popularProducts) { product ->
-                        ProductCard(
-                            product = product,
-                            onClick = { /* TODO: Navegar a detalles del producto */ },
-                            onAddToCart = { productToAdd ->
-                                cartViewModel.addItem(productToAdd)
-                            }
-                        )
+                if (isLoadingProducts) {
+                    Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                } else if (errorMessage != null) {
+                    Text(
+                        text = errorMessage ?: "Error desconocido",
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                } else if (popularProducts.isEmpty()) {
+                    Text(
+                        text = "No hay productos populares disponibles.",
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        textAlign = TextAlign.Center
+                    )
+                } else {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(popularProducts) { product ->
+                            ProductCard(
+                                product = product,
+                                onClick = { /* TODO: Navegar a detalles del producto */ },
+                                onAddToCart = { productToAdd ->
+                                    cartViewModel.addItem(productToAdd)
+                                }
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))

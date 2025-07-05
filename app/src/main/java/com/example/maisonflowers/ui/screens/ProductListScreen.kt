@@ -33,7 +33,9 @@ import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.components.ProductCard
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
-import com.example.maisonflowers.models.FlowerProduct
+import com.example.maisonflowers.models.FlowerProduct // Importar la nueva FlowerProduct del modelo
+import com.google.firebase.firestore.FirebaseFirestore // Importar FirebaseFirestore
+import kotlinx.coroutines.tasks.await // Importar para usar .await() en tareas de Firebase
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,8 +47,49 @@ fun ProductListScreen(
 ) {
     var searchQuery by remember { mutableStateOf("") }
 
-    // La lista de productos ahora estará vacía, se llenará desde Firestore
     val products = remember { mutableStateListOf<FlowerProduct>() }
+    var isLoadingProducts by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // Cargar productos por categoría desde Firestore
+    LaunchedEffect(categoryName) { // Se ejecuta cuando categoryName cambia
+        isLoadingProducts = true
+        errorMessage = null
+        try {
+            val db = FirebaseFirestore.getInstance()
+            val query = if (categoryName.isNullOrBlank() || categoryName == "Todos") {
+                db.collection("products") // Si no hay categoría o es "Todos", trae todos
+            } else {
+                db.collection("products").whereEqualTo("category", categoryName.uppercase()) // Filtrar por categoría
+            }
+
+            val result = query.get().await()
+
+            products.clear()
+            for (document in result.documents) {
+                val product = document.toObject(FlowerProduct::class.java)
+                product?.let {
+                    products.add(it)
+                }
+            }
+            isLoadingProducts = false
+        } catch (e: Exception) {
+            errorMessage = "Error al cargar productos: ${e.message}"
+            isLoadingProducts = false
+            println("Error al cargar productos de categoría $categoryName: ${e.message}") // Para depuración
+        }
+    }
+
+    val filteredProducts = remember(searchQuery, products) {
+        if (searchQuery.isBlank()) {
+            products
+        } else {
+            products.filter { product ->
+                product.name.contains(searchQuery, ignoreCase = true) ||
+                        product.description.contains(searchQuery, ignoreCase = true)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -102,31 +145,51 @@ fun ProductListScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
-            text = "Lista de Productos (${products.size})",
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
-        )
+        if (isLoadingProducts) {
+            Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else if (errorMessage != null) {
+            Text(
+                text = errorMessage ?: "Error desconocido",
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+        } else if (filteredProducts.isEmpty()) {
+            Text(
+                text = "No hay productos disponibles en esta categoría.",
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                textAlign = TextAlign.Center
+            )
+        } else {
+            Text(
+                text = "Lista de Productos (${filteredProducts.size})",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(start = 16.dp, bottom = 16.dp)
+            )
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = paddingValues.calculateBottomPadding())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(products) { product ->
-                ProductCard(
-                    product = product,
-                    onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
-                    onAddToCart = { productToAdd ->
-                        cartViewModel.addItem(productToAdd)
-                    }
-                )
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = paddingValues.calculateBottomPadding())
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(filteredProducts) { product ->
+                    ProductCard(
+                        product = product,
+                        onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
+                        onAddToCart = { productToAdd ->
+                            cartViewModel.addItem(productToAdd)
+                        }
+                    )
+                }
             }
         }
     }
