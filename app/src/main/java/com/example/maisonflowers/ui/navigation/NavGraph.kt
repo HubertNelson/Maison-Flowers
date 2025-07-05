@@ -20,6 +20,7 @@ import com.example.maisonflowers.ui.screens.ProductListScreen
 import com.example.maisonflowers.ui.screens.AccountScreen
 import com.example.maisonflowers.ui.screens.SearchScreen
 import com.example.maisonflowers.ui.screens.CartScreen
+import com.example.maisonflowers.ui.screens.ProductDetailScreen
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.maisonflowers.ui.screens.SettingsScreen
@@ -108,6 +109,20 @@ fun NavGraph(
 
         composable("edit_profile_screen") {
             EditProfileScreen(navController = navController, paddingValues = paddingValues)
+        }
+
+        // Ruta para el detalle del producto
+        composable(
+            route = "product_detail_screen/{productId}",
+            arguments = listOf(navArgument("productId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val productId = backStackEntry.arguments?.getString("productId")
+            ProductDetailScreen(
+                navController = navController,
+                productId = productId,
+                cartViewModel = cartViewModel,
+                paddingValues = paddingValues
+            )
         }
     }
 }

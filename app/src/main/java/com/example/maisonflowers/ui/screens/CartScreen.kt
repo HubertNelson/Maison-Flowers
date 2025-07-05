@@ -1,5 +1,6 @@
 package com.example.maisonflowers.ui.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.maisonflowers.R
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.models.FlowerProduct
@@ -54,7 +57,6 @@ fun CartScreen(
     val cartItems = cartViewModel.cartItems
 
     val subtotal = cartItems.sumOf { item ->
-        // Ahora el precio es un Double, no un String que necesita parseo
         item.product.price * item.quantity
     }
     val shippingCost = if (subtotal > 0) 15.00 else 0.00
@@ -195,9 +197,10 @@ fun CartItemCard(
     onQuantityChange: (Int) -> Unit,
     onRemoveItem: () -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), // Usar color de superficie del tema
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -207,8 +210,22 @@ fun CartItemCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val imageUrl = cartItem.product.imageUrl.ifEmpty { "https://placehold.co/400x300/E9C9F6/673AB7?text=No+Image" }
+            Log.d("CartScreen", "Cargando imagen para ${cartItem.product.name}: $imageUrl")
+
             Image(
-                painter = rememberAsyncImagePainter(model = cartItem.product.imageUrl.ifEmpty { "https://placehold.co/400x300/E9C9F6/673AB7?text=No+Image" }),
+                painter = rememberAsyncImagePainter(
+                    ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .apply(fun ImageRequest.Builder.() {
+                            listener(
+                                onStart = { Log.d("CoilDebug", "CartScreen: Carga iniciada para ${cartItem.product.name} - $imageUrl") },
+                                onSuccess = { _, _ -> Log.d("CoilDebug", "CartScreen: Carga exitosa para ${cartItem.product.name} - $imageUrl") },
+                                onError = { _, result -> Log.e("CoilDebug", "CartScreen: Error al cargar ${cartItem.product.name} - $imageUrl", result.throwable) }
+                            )
+                        })
+                        .build()
+                ),
                 contentDescription = cartItem.product.name,
                 modifier = Modifier
                     .size(80.dp)
@@ -221,7 +238,7 @@ fun CartItemCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = cartItem.product.name,
-                    color = MaterialTheme.colorScheme.onSurface, // Usar onSurface para el texto
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 2
@@ -242,18 +259,18 @@ fun CartItemCard(
                         onClick = { onQuantityChange(cartItem.quantity - 1) },
                         enabled = cartItem.quantity > 0
                     ) {
-                        Icon(Icons.Default.RemoveCircle, contentDescription = "Disminuir cantidad", tint = MaterialTheme.colorScheme.onSurface) // Usar onSurface
+                        Icon(Icons.Default.RemoveCircle, contentDescription = "Disminuir cantidad", tint = MaterialTheme.colorScheme.onSurface)
                     }
                     Text(
                         text = "${cartItem.quantity}",
-                        color = MaterialTheme.colorScheme.onSurface, // Usar onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
                     IconButton(
                         onClick = { onQuantityChange(cartItem.quantity + 1) }
                     ) {
-                        Icon(Icons.Default.AddCircle, contentDescription = "Aumentar cantidad", tint = MaterialTheme.colorScheme.onSurface) // Usar onSurface
+                        Icon(Icons.Default.AddCircle, contentDescription = "Aumentar cantidad", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -293,13 +310,13 @@ fun OrderSummaryRow(label: String, value: String, isTotal: Boolean = false) {
     ) {
         Text(
             text = label,
-            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, // Usar onSurface
+            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontSize = if (isTotal) 18.sp else 16.sp,
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal
         )
         Text(
             text = value,
-            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface, // Usar onSurface
+            color = if (isTotal) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
             fontSize = if (isTotal) 18.sp else 16.sp,
             fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal,
             textAlign = TextAlign.End
@@ -307,14 +324,12 @@ fun OrderSummaryRow(label: String, value: String, isTotal: Boolean = false) {
     }
 }
 
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewCartScreenWithItems() {
     MaisonFlowersTheme {
         val navController = rememberNavController()
         val previewCartViewModel = CartViewModel()
-        // Usar FlowerProduct del modelo
         previewCartViewModel.addItem(FlowerProduct("1", "Preview Roses", "Desc", 10.00, "https://placehold.co/400x300/E9C9F6/673AB7?text=Rosas", "ROSAS", false))
         previewCartViewModel.addItem(FlowerProduct("2", "Preview Girasoles", "Desc", 15.00, "https://placehold.co/400x300/E9C9F6/673AB7?text=Girasoles", "GIRASOLES", true))
 

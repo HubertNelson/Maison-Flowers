@@ -34,9 +34,9 @@ import com.example.maisonflowers.ui.components.FlowerCategory
 import com.example.maisonflowers.ui.components.CategoryItem
 import com.example.maisonflowers.ui.components.ProductCard
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
-import com.example.maisonflowers.models.FlowerProduct // Importar la nueva FlowerProduct del modelo
-import com.google.firebase.firestore.FirebaseFirestore // Importar FirebaseFirestore
-import kotlinx.coroutines.tasks.await // Importar para usar .await() en tareas de Firebase
+import com.example.maisonflowers.models.FlowerProduct
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.tasks.await
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -226,7 +226,7 @@ fun HomeScreen(
                         items(popularProducts) { product ->
                             ProductCard(
                                 product = product,
-                                onClick = { /* TODO: Navegar a detalles del producto */ },
+                                onClick = { productId -> navController.navigate("product_detail_screen/$productId") }, // Navegar al detalle del producto
                                 onAddToCart = { productToAdd ->
                                     cartViewModel.addItem(productToAdd)
                                 }

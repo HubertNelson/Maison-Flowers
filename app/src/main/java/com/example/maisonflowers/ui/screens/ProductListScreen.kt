@@ -184,7 +184,7 @@ fun ProductListScreen(
                 items(filteredProducts) { product ->
                     ProductCard(
                         product = product,
-                        onClick = { /* TODO: Navegar a la pantalla de detalles del producto */ },
+                        onClick = { productId -> navController.navigate("product_detail_screen/$productId") }, // Navegar al detalle del producto
                         onAddToCart = { productToAdd ->
                             cartViewModel.addItem(productToAdd)
                         }

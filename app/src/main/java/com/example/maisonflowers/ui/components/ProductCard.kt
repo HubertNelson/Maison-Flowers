@@ -29,7 +29,7 @@ import com.example.maisonflowers.models.FlowerProduct
 @Composable
 fun ProductCard(
     product: FlowerProduct, // Cambiado a FlowerProduct del modelo
-    onClick: (FlowerProduct) -> Unit,
+    onClick: (String) -> Unit, // Cambiado para recibir solo el ID del producto
     onAddToCart: (FlowerProduct) -> Unit
 ) {
     Card(
@@ -38,7 +38,7 @@ fun ProductCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         modifier = Modifier
             .width(180.dp)
-            .clickable { onClick(product) }
+            .clickable { onClick(product.id) } // Pasa el ID del producto al hacer clic
     ) {
         Column(
             modifier = Modifier

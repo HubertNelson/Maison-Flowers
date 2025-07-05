@@ -4,122 +4,162 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.maisonflowers.ui.navigation.NavGraph
 import com.example.maisonflowers.ui.theme.MaisonFlowersTheme
 import com.example.maisonflowers.ui.viewmodels.CartViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.compose.foundation.isSystemInDarkTheme // Importar para isSystemInDarkTheme
-import androidx.compose.runtime.collectAsState // Importar para collectAsState
-import androidx.compose.ui.platform.LocalContext // Importar para LocalContext
-import com.example.maisonflowers.data.ThemeManager // Importar ThemeManager
-import com.example.maisonflowers.data.ThemeMode // Importar ThemeMode
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.platform.LocalContext
+import coil.ImageLoader
+import coil.compose.LocalImageLoader
+import coil.decode.SvgDecoder
+import com.example.maisonflowers.data.ThemeManager
+import com.example.maisonflowers.data.ThemeMode
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent {
-            // Obtener el ThemeManager y el modo de tema actual
-            val context = LocalContext.current
-            val themeManager = remember { ThemeManager(context) }
-            val themeMode by themeManager.themeMode.collectAsState(initial = ThemeMode.SYSTEM) // Observa el modo de tema
 
-            // Determinar si el tema oscuro debe estar activo
-            val darkTheme = when (themeMode) {
-                ThemeMode.SYSTEM -> isSystemInDarkTheme() // Usa la configuración del sistema
-                ThemeMode.LIGHT -> false // Fuerza el tema claro
-                ThemeMode.DARK -> true // Fuerza el tema oscuro
+        setContent {
+            // Obtener el contexto dentro del Composable
+            val context = LocalContext.current
+
+            val imageLoader = remember { // Usar remember para que se cree una sola vez
+                ImageLoader.Builder(context)
+                    .components {
+                        add(SvgDecoder.Factory())
+                    }
+                    .build()
             }
 
-            MaisonFlowersTheme(darkTheme = darkTheme) { // Pasar el valor de darkTheme al tema
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MaisonFlowersApp(themeManager = themeManager) // Pasar themeManager a MaisonFlowersApp
+            // Proporcionar el ImageLoader personalizado a la jerarquía de Composables
+            CompositionLocalProvider(LocalImageLoader provides imageLoader) {
+                val themeManager = remember { ThemeManager(applicationContext) }
+                val currentTheme by themeManager.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+
+                MaisonFlowersTheme(darkTheme = when (currentTheme) {
+                    ThemeMode.LIGHT -> false
+                    ThemeMode.DARK -> true
+                    ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+                }) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        MaisonFlowersApp(themeManager = themeManager)
+                    }
                 }
             }
         }
     }
 }
 
+enum class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
+    Home("home_screen", Icons.Default.Home, "Inicio"),
+    Category("category_screen", Icons.Default.Apps, "Categorías"),
+    Search("search_screen", Icons.Default.Search, "Buscar"),
+    Cart("cart_screen", Icons.Default.ShoppingCart, "Carrito"),
+    Account("account_screen", Icons.Default.Person, "Cuenta")
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MaisonFlowersApp(themeManager: ThemeManager) { // Recibe themeManager
+fun MaisonFlowersApp(themeManager: ThemeManager) {
     val navController = rememberNavController()
     val cartViewModel: CartViewModel = viewModel()
 
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
-    val showBottomBar = currentRoute in listOf(
-        "home_screen",
-        "category_screen",
-        "search_screen",
-        "cart_screen",
-        "account_screen"
-    )
-
     Scaffold(
         bottomBar = {
-            if (showBottomBar) {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.onBackground
-                ) {
-                    val navItems = listOf(
-                        "home_screen" to Pair(Icons.Filled.Home, "Inicio"),
-                        "category_screen" to Pair(Icons.Filled.Apps, "Categorias"),
-                        "search_screen" to Pair(Icons.Filled.Search, "Buscar"),
-                        "cart_screen" to Pair(Icons.Filled.ShoppingCart, "Carrito"),
-                        "account_screen" to Pair(Icons.Filled.Person, "Cuenta")
-                    )
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
 
-                    navItems.forEachIndexed { index, (route, iconLabel) ->
-                        val isSelected = currentRoute?.startsWith(route) == true
+            val bottomBarRoutes = listOf(
+                BottomNavItem.Home.route,
+                BottomNavItem.Category.route,
+                BottomNavItem.Search.route,
+                BottomNavItem.Cart.route,
+                BottomNavItem.Account.route
+            )
+
+            if (currentDestination?.route in bottomBarRoutes ||
+                currentDestination?.hierarchy?.any { it.route in bottomBarRoutes } == true) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.height(80.dp)
+                ) {
+                    val items = listOf(
+                        BottomNavItem.Home,
+                        BottomNavItem.Category,
+                        BottomNavItem.Search,
+                        BottomNavItem.Cart,
+                        BottomNavItem.Account
+                    )
+                    items.forEach { screen ->
+                        val isSelected = currentDestination?.hierarchy?.any { it.route == screen.route } == true
                         NavigationBarItem(
-                            selected = isSelected,
-                            onClick = {
-                                if (!isSelected) {
-                                    navController.navigate(route) {
-                                        popUpTo(navController.graph.startDestinationId) {
-                                            saveState = true
+                            icon = {
+                                if (screen == BottomNavItem.Cart) {
+                                    val cartItemCount = cartViewModel.cartItems.sumOf { it.quantity }
+                                    BadgedBox(
+                                        badge = {
+                                            if (cartItemCount > 0) {
+                                                Badge { Text(cartItemCount.toString()) }
+                                            }
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                    ) {
+                                        Icon(screen.icon, contentDescription = screen.label)
                                     }
+                                } else {
+                                    Icon(screen.icon, contentDescription = screen.label)
                                 }
                             },
-                            icon = { Icon(iconLabel.first, contentDescription = iconLabel.second) },
-                            label = { Text(iconLabel.second) },
+                            label = { Text(screen.label) },
+                            selected = isSelected,
+                            onClick = {
+                                navController.navigate(screen.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = MaterialTheme.colorScheme.primary,
                                 selectedTextColor = MaterialTheme.colorScheme.primary,
-                                unselectedIconColor = MaterialTheme.colorScheme.onBackground,
-                                unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         )
                     }
@@ -131,18 +171,7 @@ fun MaisonFlowersApp(themeManager: ThemeManager) { // Recibe themeManager
             navController = navController,
             cartViewModel = cartViewModel,
             paddingValues = paddingValues,
-            themeManager = themeManager // Pasar themeManager al NavGraph
+            themeManager = themeManager
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    MaisonFlowersTheme {
-        // Para el preview, necesitamos una instancia simulada de ThemeManager
-        val context = LocalContext.current
-        val themeManager = remember { ThemeManager(context) }
-        MaisonFlowersApp(themeManager = themeManager)
     }
 }
